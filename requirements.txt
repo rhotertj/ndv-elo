@@ -1,0 +1,7 @@
+sqlalchemy
+beautifulsoup4
+requests
+numpy
+trueskill
+scipy
+seaborn
