@@ -1,12 +1,12 @@
-# For a given match in the future, get competing players, plot their rating and determine best fixture for given subset of players
-# also check who played at what position!
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as grid_spec
+from matplotlib.colors import ListedColormap
 import itertools
-
 import trueskill
+
 from scipy.stats import norm
 from sqlalchemy import select, insert, update, create_engine, Date, and_
 from sqlalchemy.orm import Session, aliased
@@ -20,28 +20,87 @@ def win_probability(team1, team2):
     ts = trueskill.global_env()
     return ts.cdf(delta_mu / denom)
 
-def plot_skill_distributions(players):
-    # TODO: FaceGrid seems to be way too tricky, try comparing gaussion dist plots
-    x_values = np.linspace(0, 50, 1000)
-    data = {
-        "name" : [f"{p[0]} ({p[1]})" for p in players],
-        "team" : [str(p[1])[:3] for p in players],
-        "mu" : [p[2].mu for p in players],
-        "sigma" : [p[2].sigma for p in players],
-        "skill_dist" : np.stack([norm.pdf(x_values,p[2].mu,p[2].sigma) for p in players])
 
-    }
-    d = norm.pdf(x_values,0,1)
-    print(type(d), d.shape)
-    print(data["skill_dist"].shape)
+def plot_ridge_skill_distributions(home_players, away_players):
+    # https://matplotlib.org/matplotblog/posts/create-ridgeplots-in-matplotlib/
+    x = np.linspace(0, 50, 1000)
+
+    all_players = home_players + away_players
+    all_players = sorted(all_players, key=lambda p : p[2].mu, reverse=True) 
+
+    home_map = plt.colormaps["Greens"]
+    away_map = plt.colormaps["Purples"]
+
+    gs = (grid_spec.GridSpec(len(all_players), 1))
+    fig = plt.figure(figsize=(8,6))
+
+    ax_objs = []
+    for i, player in enumerate(all_players):
+        # creating new axes object and appending to ax_objs
+        ax_objs.append(fig.add_subplot(gs[i:i+1, 0:]))
+
+        plot = ax_objs[-1].plot(x, norm.pdf(x, player[2].mu, player[2].sigma) , alpha=1, color="#f0f0f0")
+        color_mapping = home_map if player in home_players else away_map
+        ax_objs[-1].fill_between(x, norm.pdf(x, player[2].mu, player[2].sigma) , color=color_mapping((i*16)+64))
+
+        # make background transparent
+        rect = ax_objs[-1].patch
+        rect.set_alpha(0)
+
+        # remove borders, axis ticks, and labels
+        ax_objs[-1].set_yticklabels([])
+
+        # remove spines
+        spines = ["top","right","left","bottom"]
+        for s in spines:
+            ax_objs[-1].spines[s].set_visible(False)
+
+        # only allow x ticks at the very bottom
+        if i == len(all_players) - 1:
+            ax_objs[-1].set_xlabel("Skill Rating", fontsize=14)
+        else:
+            ax_objs[-1].set_xticklabels([])
+
+        ax_objs[-1].text(-1, 0, player[0], fontsize=14, ha="right")
+
+    gs.update(hspace= -0.5)
+    plt.tight_layout()
+    return fig
+
+def plot_paired_skill_distributions(home_players, away_players):
+    plt.clf()
+    sns.set_context("notebook")
+    sns.set_style("white")
+
+    x = np.linspace(0, 50, 1000)
+    y_home = []
+    for player in home_players: 
+        y = norm.pdf(x, player[2].mu, player[2].sigma)
+        y_home.append(y)
+
+    y_away = []
+    for player in away_players:
+        x = np.linspace(0, 50, 1000)
+        y = norm.pdf(x, player[2].mu, player[2].sigma)
+        y_away.append(y)
+
+
+    fig, axes = plt.subplots(len(home_players), len(away_players), sharey=True, figsize=(20,16))
     
-    df = pd.DataFrame(data)
-    ridge_plot = sns.FacetGrid(df, row="name", hue="team", aspect=10, height=1.5)
-    ridge_plot.map(sns.kdeplot, "skill_dist", clip_on=False, shade=True, alpha=0.7, lw=4, bw=.2)
-    # ridge_plot.map(plt.axhline, y=0, lw=4, clip_on=False)
+    home_indices = list(range(len(home_players)))
+    away_indices = list(range(len(away_players)))
 
-    return ridge_plot
+    for h, a in itertools.product(home_indices, away_indices):
+        axes[h, a].plot(x ,y_home[h], alpha=1, color="green")
+        axes[h, a].fill_between(x ,y_home[h], alpha=0.4, color="green")
+        axes[h, a].plot(x, y_away[a], color="blue")
+        axes[h, a].fill_between(x ,y_away[a], color="blue", alpha=0.4)
 
+        axes[h, 0].set_ylabel(home_players[h][0])
+        axes[-1, a].set_xlabel(away_players[a][0])
+
+    plt.yticks(ticks=[])
+    return fig
 
 def read_player_skill_for_team(club_name, competition, ignore_players=None):
     if ignore_players is None:
@@ -108,8 +167,7 @@ def plot_match_qualities(players_a, players_b):
         player_b = players_b[i_pb]
         pa_win = win_probability([player_a[2]], [player_b[2]])
         qualities[i_pa, i_pb] = pa_win
-    sns.set_theme(style="whitegrid")
-    f, ax = plt.subplots()
+    f = plt.figure(figsize=(14,10))
 
     cmap = sns.color_palette("coolwarm", as_cmap=True)
     chart = sns.heatmap(
@@ -127,6 +185,17 @@ def plot_match_qualities(players_a, players_b):
     chart.set_xticklabels(chart.get_xticklabels(), rotation=45, horizontalalignment='right')
 
     return f
+
+def read_positions_for_player(player_id):
+    engine = create_engine("sqlite:///../darts.db")
+    with Session(engine) as session:
+        home_stmt = select(data.SinglesMatch.match_number).where(data.SinglesMatch.home_player == player_id)
+        away_stmt = select(data.SinglesMatch.match_number).where(data.SinglesMatch.away_player == player_id)
+        home_positions = [r[0] for r in session.execute(home_stmt).all()]
+        away_positions = [r[0] for r in session.execute(away_stmt).all()]
+
+    return home_positions, away_positions
+
 
 def plot_positions():
     # get usual match positions into player tuple first, then, plot histogram here
