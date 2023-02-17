@@ -67,11 +67,30 @@ def plot_ridge_skill_distributions(home_players, away_players):
     plt.tight_layout()
     return fig
 
-def plot_paired_skill_distributions(home_players, away_players):
-    plt.clf()
-    sns.set_context("notebook")
-    sns.set_style("white")
 
+# plot previous lineup per player
+def plot_player_positions_bar(players):
+    sns.set_style("darkgrid")
+    fig, ax = plt.subplots(len(players), 2, figsize=(14,10), sharex=True, sharey=True)
+    plt.xticks(ticks=[1,2,3,4])
+
+    skill_colormap = plt.colormaps["jet"]
+
+    sorted_players = sorted(players, key=lambda p : p[2])
+
+    for i, player in enumerate(sorted_players):
+        home_positions, away_positions = read_positions_for_player(player[1])
+        home_bins, home_occurences = np.unique(home_positions, return_counts=True)
+        away_bins, away_occurences = np.unique(away_positions, return_counts=True)
+
+        ax[i, 0].bar(home_bins, home_occurences, color=skill_colormap((i * 10) + 80))
+        ax[i, 1].bar(away_bins, away_occurences, color=skill_colormap((i * 10) + 80))
+        # ax[i, 0].set_ylabel(away_players[i][0], rotation=0)
+        ax[i, 0].text(-0.1, 1, player[0], fontsize=14, ha="right")
+
+    return fig
+
+def plot_paired_skill_distributions(home_players, away_players):
     x = np.linspace(0, 50, 1000)
     y_home = []
     for player in home_players: 
@@ -101,6 +120,29 @@ def plot_paired_skill_distributions(home_players, away_players):
 
     plt.yticks(ticks=[])
     return fig
+
+def get_previous_matches(my_players, other_players):
+    engine = create_engine("sqlite:///../darts.db")
+    with Session(engine) as session:
+
+        stmt = select(data.SinglesMatch, data.TeamMatch).join(data.TeamMatch).where(
+            and_(data.SinglesMatch.home_player.in_([p[1] for p in my_players]), data.SinglesMatch.away_player.in_([p[1] for p in other_players])) |
+            and_(data.SinglesMatch.away_player.in_([p[1] for p in my_players]), data.SinglesMatch.home_player.in_([p[1] for p in other_players])) 
+        )
+        result = session.execute(stmt).all()
+
+    match_strings = []
+    for player in my_players:
+        player_matches = [(s, t) for s, t in result if player[1] in (s.home_player, s.away_player)]
+        for single, team in player_matches:
+            prev_single_str = f"{single.home_player} {single.result} {single.away_player}".replace(str(player[1]), player[0])
+            prev_team_str = f" @ {team.date}, {team.result}"
+            match_strings.append(prev_single_str + prev_team_str)
+
+    for player in other_players:
+        match_strings = [match.replace(str(player[1]), player[0]) for match in match_strings]
+    
+    return match_strings
 
 def read_player_skill_for_team(club_name, competition, ignore_players=None):
     if ignore_players is None:
