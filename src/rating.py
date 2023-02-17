@@ -1,9 +1,10 @@
 from sqlalchemy import select, insert, update, create_engine, Date, and_
 from sqlalchemy.orm import Session, aliased
-
+from pathlib import Path
 import trueskill
 import data
-
+import pickle as pkl
+from tqdm import tqdm
 
 def reset_ratings():
     engine = create_engine("sqlite:///darts.db")
@@ -79,7 +80,16 @@ def compute_ratings(competition):
 
     
 if __name__ == "__main__":
-    # reset_ratings()
-    compute_ratings("DBH Bezirksliga 2")
-    compute_ratings("DBH Bezirksoberliga")
+    data_path = Path("./data")
+    
+    with open(data_path / "assocs_comps.pkl", "rb") as f:
+        assocs_comps = pkl.load(f)
+
+    reset_ratings()
+
+    for association in ["DBH", "NDV"]:
+        print("Compute ratings for", association)
+        for comp in tqdm(assocs_comps[association]):
+            compute_ratings(comp)
+
     #SELECT * FROM skillrating_table JOIN player_table ON skillrating_table.player = player_table.id ORDER BY skillrating_table.rating_mu DESC
