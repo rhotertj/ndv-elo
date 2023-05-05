@@ -7,7 +7,8 @@ TODOS:
 - More common queries
 - Title for plots
 - Season plot, player performace per competition (make scatterplot, rating and teams as axis)
-- Invstigate parsing issues for names and matches
+- Make inserting data and queries season sensitive!
+- Investigate parsing issues for names and matches
 
 Crawl data:
 ```sh
