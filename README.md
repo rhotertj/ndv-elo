@@ -2,9 +2,12 @@
 
 TODOS:
 
+- Proper process for updating db and ratings without going through complete season
 - CLI args for scripts
 - More common queries
-- Season plot, player performace per competition
+- Title for plots
+- Season plot, player performace per competition (make scatterplot, rating and teams as axis)
+- Invstigate parsing issues for names and matches
 
 Crawl data:
 ```sh

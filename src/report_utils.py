@@ -123,8 +123,6 @@ def plot_paired_skill_distributions(home_players, away_players):
     return fig
 
 def plot_match_qualities(players_a, players_b):
-    # Try this?
-    # https://seaborn.pydata.org/examples/heat_scatter.html
     qualities = np.zeros((len(players_a), len(players_b)))
     a_indices = list(range(len(players_a)))
     b_indices = list(range(len(players_b)))
