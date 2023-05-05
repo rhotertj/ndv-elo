@@ -11,6 +11,7 @@ from scipy.stats import norm
 from sqlalchemy import select, insert, update, create_engine, Date, and_
 from sqlalchemy.orm import Session, aliased
 import data
+from common_queries import get_positions_for_player
 
 def win_probability(team1, team2):
     delta_mu = sum(r.mu for r in team1) - sum(r.mu for r in team2)
@@ -26,7 +27,7 @@ def plot_ridge_skill_distributions(home_players, away_players):
     x = np.linspace(0, 50, 1000)
 
     all_players = home_players + away_players
-    all_players = sorted(all_players, key=lambda p : p[2].mu, reverse=True) 
+    all_players = sorted(all_players, key=lambda p : p.rating.mu, reverse=True) 
 
     home_map = plt.colormaps["Greens"]
     away_map = plt.colormaps["Purples"]
@@ -39,9 +40,9 @@ def plot_ridge_skill_distributions(home_players, away_players):
         # creating new axes object and appending to ax_objs
         ax_objs.append(fig.add_subplot(gs[i:i+1, 0:]))
 
-        plot = ax_objs[-1].plot(x, norm.pdf(x, player[2].mu, player[2].sigma) , alpha=1, color="#f0f0f0")
+        plot = ax_objs[-1].plot(x, norm.pdf(x, player.rating.mu, player.rating.sigma) , alpha=1, color="#f0f0f0")
         color_mapping = home_map if player in home_players else away_map
-        ax_objs[-1].fill_between(x, norm.pdf(x, player[2].mu, player[2].sigma) , color=color_mapping((i*16)+64))
+        ax_objs[-1].fill_between(x, norm.pdf(x, player.rating.mu, player.rating.sigma) , color=color_mapping((i*16)+64))
 
         # make background transparent
         rect = ax_objs[-1].patch
@@ -61,7 +62,7 @@ def plot_ridge_skill_distributions(home_players, away_players):
         else:
             ax_objs[-1].set_xticklabels([])
 
-        ax_objs[-1].text(-1, 0, player[0], fontsize=14, ha="right")
+        ax_objs[-1].text(-1, 0, player.name, fontsize=14, ha="right")
 
     gs.update(hspace= -0.5)
     plt.tight_layout()
@@ -76,17 +77,17 @@ def plot_player_positions_bar(players):
 
     skill_colormap = plt.colormaps["jet"]
 
-    sorted_players = sorted(players, key=lambda p : p[2])
+    sorted_players = sorted(players, key=lambda p : p.rating.mu)
 
     for i, player in enumerate(sorted_players):
-        home_positions, away_positions = read_positions_for_player(player[1])
+        home_positions, away_positions = get_positions_for_player(player.id)
         home_bins, home_occurences = np.unique(home_positions, return_counts=True)
         away_bins, away_occurences = np.unique(away_positions, return_counts=True)
 
         ax[i, 0].bar(home_bins, home_occurences, color=skill_colormap((i * 10) + 80))
         ax[i, 1].bar(away_bins, away_occurences, color=skill_colormap((i * 10) + 80))
         # ax[i, 0].set_ylabel(away_players[i][0], rotation=0)
-        ax[i, 0].text(-0.1, 1, player[0], fontsize=14, ha="right")
+        ax[i, 0].text(-0.1, 1, player.name, fontsize=14, ha="right")
 
     return fig
 
@@ -94,13 +95,13 @@ def plot_paired_skill_distributions(home_players, away_players):
     x = np.linspace(0, 50, 1000)
     y_home = []
     for player in home_players: 
-        y = norm.pdf(x, player[2].mu, player[2].sigma)
+        y = norm.pdf(x, player.rating.mu, player.rating.sigma)
         y_home.append(y)
 
     y_away = []
     for player in away_players:
         x = np.linspace(0, 50, 1000)
-        y = norm.pdf(x, player[2].mu, player[2].sigma)
+        y = norm.pdf(x, player.rating.mu, player.rating.sigma)
         y_away.append(y)
 
 
@@ -115,8 +116,8 @@ def plot_paired_skill_distributions(home_players, away_players):
         axes[h, a].plot(x, y_away[a], color="blue")
         axes[h, a].fill_between(x ,y_away[a], color="blue", alpha=0.4)
 
-        axes[h, 0].set_ylabel(home_players[h][0])
-        axes[-1, a].set_xlabel(away_players[a][0])
+        axes[h, 0].set_ylabel(home_players[h].name)
+        axes[-1, a].set_xlabel(away_players[a].name)
 
     plt.yticks(ticks=[])
     return fig
@@ -131,7 +132,7 @@ def plot_match_qualities(players_a, players_b):
     for i_pa, i_pb in itertools.product(a_indices, b_indices):
         player_a = players_a[i_pa]
         player_b = players_b[i_pb]
-        pa_win = win_probability([player_a[2]], [player_b[2]])
+        pa_win = win_probability([player_a.rating], [player_b.rating])
         qualities[i_pa, i_pb] = pa_win
     f = plt.figure(figsize=(14,10))
 
@@ -152,17 +153,6 @@ def plot_match_qualities(players_a, players_b):
 
     return f
 
-def read_positions_for_player(player_id):
-    engine = create_engine("sqlite:///../darts.db")
-    with Session(engine) as session:
-        home_stmt = select(data.SinglesMatch.match_number).where(data.SinglesMatch.home_player == player_id)
-        away_stmt = select(data.SinglesMatch.match_number).where(data.SinglesMatch.away_player == player_id)
-        home_positions = [r[0] for r in session.execute(home_stmt).all()]
-        away_positions = [r[0] for r in session.execute(away_stmt).all()]
-
-    return home_positions, away_positions
-
-
 def plot_positions():
     # get usual match positions into player tuple first, then, plot histogram here
     pass
@@ -171,7 +161,4 @@ def best_fixture(players):
     # get combination with highest combined winning percentage
     pass
 
-if __name__ == "__main__":
-    #han96 = read_player_skill_for_team("Hannover 96", "DBH Bezirksliga 2")
-    #opp = read_player_skill_for_team("Sieben Zwerge Dart Team e.V.", "DBH Bezirksliga 2")
-    #plot_match_qualities(han96, opp)
+

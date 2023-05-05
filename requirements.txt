@@ -5,3 +5,5 @@ numpy
 trueskill
 scipy
 seaborn
+tqdm
+notebook
