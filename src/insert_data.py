@@ -263,7 +263,7 @@ def populate_teammatches(engine, team_matches, matches):
 if __name__ == "__main__":
 
     engine = create_engine("sqlite:///darts.db")
-    data_path = Path("./data")
+    data_path = Path("./data_03_05_23")
     
     with open(data_path / "assocs_comps.pkl", "rb") as f:
         ac = pkl.load(f)

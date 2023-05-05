@@ -9,9 +9,9 @@ from tqdm import tqdm
 def reset_ratings():
     engine = create_engine("sqlite:///darts.db")
     with Session(engine) as session:
-            stmt = update(data.SkillRating).values(rating_mu=25, rating_sigma=8.3333)
-            session.execute(stmt)
-            session.commit()
+        stmt = update(data.SkillRating).values(rating_mu=25, rating_sigma=8.3333)
+        session.execute(stmt)
+        session.commit()
 
 def compute_ratings(competition):
     # TODO Doubles
@@ -80,12 +80,12 @@ def compute_ratings(competition):
 
     
 if __name__ == "__main__":
-    data_path = Path("./data")
+    data_path = Path("./data_03_05_23")
     
     with open(data_path / "assocs_comps.pkl", "rb") as f:
         assocs_comps = pkl.load(f)
 
-    reset_ratings()
+    # reset_ratings()
 
     for association in ["DBH", "NDV"]:
         print("Compute ratings for", association)

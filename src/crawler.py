@@ -12,6 +12,7 @@ from collections import defaultdict
 from datetime import datetime
 import pickle as pkl
 from pathlib import Path
+import os
 
 NDV_URL = "https://ndv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=112&filVbsubKey=1&filStaffKey=667&filStaffFsGrpdataKey=0#"
 
@@ -257,27 +258,29 @@ class Crawler():
 
 if "__main__" == __name__:
     # TODO: Run crawler for NDV and DBH, pickle results to avoid crawling too often
-    data_path = Path("./data")
+    data_path = Path("./data_03_05_23")
+    os.makedirs(data_path, exist_ok=True)
     with Crawler() as crawler:
         a_co = {}
-        assocs = crawler.get_associations()
+        # assocs = crawler.get_associations()
+        assocs = ["NDV", "DBH"]
         for a in assocs:
             comps = crawler.get_competitions(a)
             a_co[a] = comps
             for comp in comps:
                 teams, players = crawler.get_clubs_and_teams([a], [comp])
-                # matchdays, matches = crawler.get_matches([a], [comp])
+                matchdays, matches = crawler.get_matches([a], [comp])
                 with open(data_path / f"teamsclubs_{a}_{comp.replace('/', '')}.pkl", "wb+") as f:
                     pkl.dump(teams, f)
 
                 with open(data_path / f"players_{a}_{comp.replace('/', '')}.pkl", "wb+") as f:
                     pkl.dump(players, f)
 
-                # with open(data_path / f"matchdays_{a}_{comp}.pkl", "wb+") as f:
-                #     pkl.dump(matchdays, f)
+                with open(data_path / f"matchdays_{a}_{comp}.pkl", "wb+") as f:
+                    pkl.dump(matchdays, f)
 
-                # with open(data_path / f"matches_{a}_{comp}.pkl", "wb+") as f:
-                #     pkl.dump(matches, f)
+                with open(data_path / f"matches_{a}_{comp}.pkl", "wb+") as f:
+                    pkl.dump(matches, f)
 
     
     with open("assocs_comps.pkl", "wb+") as f:
