@@ -121,82 +121,6 @@ def plot_paired_skill_distributions(home_players, away_players):
     plt.yticks(ticks=[])
     return fig
 
-def get_previous_matches(my_players, other_players):
-    engine = create_engine("sqlite:///../darts.db")
-    with Session(engine) as session:
-
-        stmt = select(data.SinglesMatch, data.TeamMatch).join(data.TeamMatch).where(
-            and_(data.SinglesMatch.home_player.in_([p[1] for p in my_players]), data.SinglesMatch.away_player.in_([p[1] for p in other_players])) |
-            and_(data.SinglesMatch.away_player.in_([p[1] for p in my_players]), data.SinglesMatch.home_player.in_([p[1] for p in other_players])) 
-        )
-        result = session.execute(stmt).all()
-
-    match_strings = []
-    for player in my_players:
-        player_matches = [(s, t) for s, t in result if player[1] in (s.home_player, s.away_player)]
-        for single, team in player_matches:
-            prev_single_str = f"{single.home_player} {single.result} {single.away_player}".replace(str(player[1]), player[0])
-            prev_team_str = f" @ {team.date}, {team.result}"
-            match_strings.append(prev_single_str + prev_team_str)
-
-    for player in other_players:
-        match_strings = [match.replace(str(player[1]), player[0]) for match in match_strings]
-    
-    return match_strings
-
-def read_player_skill_for_team(club_name, competition, ignore_players=None):
-    if ignore_players is None:
-        ignore_players = []
-
-    engine = create_engine("sqlite:///../darts.db")
-    with Session(engine) as session:
-        # select club from clubname
-        club_stmt = select(data.Club.id).where(data.Club.name == club_name)
-        club_id = session.execute(club_stmt).first()
-        # select competition from name
-        comp_stmt = select(data.Competition.id).where(data.Competition.name == competition)
-        comp_id = session.execute(comp_stmt).first()
-        # select team matches for competition
-        team_match_stmt = select(data.TeamMatch.id).where(data.TeamMatch.competition == comp_id[0])
-        team_matches_id = session.execute(team_match_stmt).all()
-
-        # iterate over team_matches of this competition
-        # extract players that played for the relevant club
-        relevant_matches = []
-        for team_match_id in team_matches_id:
-            players_home_stmt = select(data.SinglesMatch, data.Player).join(
-                data.Player, data.SinglesMatch.home_player == data.Player.id
-            ).where(
-                    (data.SinglesMatch.team_match == team_match_id[0]) & \
-                    (data.Player.club == club_id[0])
-                )
-            home_players_club = session.execute(players_home_stmt).all()
-            if home_players_club:
-                relevant_matches.extend(home_players_club)
-
-            players_away_stmt = select(data.SinglesMatch, data.Player).join(
-                data.Player, data.SinglesMatch.away_player == data.Player.id
-            ).where(
-                    (data.SinglesMatch.team_match == team_match_id[0]) & \
-                    (data.Player.club == club_id[0])
-                )
-            away_players_club = session.execute(players_away_stmt).all()
-            if away_players_club:
-                relevant_matches.extend(away_players_club)
-
-        ratings = []
-        players_retrieved = []
-        for _, player in relevant_matches:
-            if player.id in players_retrieved or player.name in ignore_players:
-                continue
-            rating_stmt = select(data.SkillRating).where((data.SkillRating.player == player.id) & (data.SkillRating.competition == comp_id[0]))
-            rating = session.execute(rating_stmt).first()
-            player_rating = (player.name, player.id, trueskill.Rating(rating[0].rating_mu, rating[0].rating_sigma))
-            players_retrieved.append(player.id)
-
-            ratings.append(player_rating)
-    return ratings
-
 def plot_match_qualities(players_a, players_b):
     # Try this?
     # https://seaborn.pydata.org/examples/heat_scatter.html
@@ -248,6 +172,6 @@ def best_fixture(players):
     pass
 
 if __name__ == "__main__":
-    han96 = read_player_skill_for_team("Hannover 96", "DBH Bezirksliga 2")
-    opp = read_player_skill_for_team("Sieben Zwerge Dart Team e.V.", "DBH Bezirksliga 2")
-    plot_match_qualities(han96, opp)
+    #han96 = read_player_skill_for_team("Hannover 96", "DBH Bezirksliga 2")
+    #opp = read_player_skill_for_team("Sieben Zwerge Dart Team e.V.", "DBH Bezirksliga 2")
+    #plot_match_qualities(han96, opp)

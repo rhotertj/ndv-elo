@@ -1,4 +1,4 @@
-from sqlalchemy import select, insert, update, create_engine, Date, and_
+from sqlalchemy import select, insert, update, create_engine, Date, and_, Engine
 from sqlalchemy.orm import Session, aliased
 from tqdm import tqdm
 import datetime
@@ -8,13 +8,30 @@ import pickle as pkl
 import data
 from pathlib import Path
 
-def reorder_name(player):
+def reorder_name(player : str):
+    """Reorder lastname, name(s) format into name(s) surname.
+
+    Args:
+        player (str): Player name.
+
+    Returns:
+        str: Player name
+    """    
     player = player.strip()
     name_split = player.split(",")
     return f"{' '.join([n.strip() for n in name_split[1:]])} {name_split[0]}".strip()
 
 #TODO: Players have a club but no team, maybe create "temporary" id for more matches
-def populate_players(engine, players):
+def populate_players(engine : Engine, players : list):
+    """Populate the database with players.
+
+    Args:
+        engine (Engine): Engine connected to the database.
+        players (list): Player list of (id, name, club_name) tuple.
+
+    Raises:
+        ValueError: _description_
+    """    
     with Session(engine) as session:
         session.begin()
         for id, name, club_name in players:
@@ -43,7 +60,13 @@ def populate_players(engine, players):
             else:
                 session.commit()
 
-def populate_clubs_and_teams(engine, clubs_and_teams):
+def populate_clubs_and_teams(engine : Engine, clubs_and_teams : dict):
+    """Populate the database with clubs and their respective team letters.
+
+    Args:
+        engine (Engine): Engine connected to the database.
+        clubs_and_teams (dict): A dictionary with clubs as keys and teams a values.
+    """    
     with Session(engine) as session:
         session.begin()
         for club, teams in clubs_and_teams.items():
@@ -65,7 +88,13 @@ def populate_clubs_and_teams(engine, clubs_and_teams):
             else:
                 session.commit()
         
-def populate_competitions(engine, associations_competitions):
+def populate_competitions(engine : Engine, associations_competitions : dict):
+    """Populate the database with associations and their respective competitions.
+
+    Args:
+        engine (Engine): Engine connected to the database.
+        associations_competitions (dict): Dictionary with associations as keys and competitions as values.
+    """    
     with Session(engine) as session:
         session.begin()
         for assoc, comps in associations_competitions.items():
@@ -85,7 +114,14 @@ def populate_competitions(engine, associations_competitions):
                 else:
                     session.commit()
 
-def populate_matches(session, matches, teammatch_id=None):
+def populate_matches(session : Session, matches : list, teammatch_id : int = None):
+    """Parses players and result from match info and creates singles or doubles match. Links to teammatch if ID is provided.
+
+    Args:
+        session (Session): Open session to database.
+        matches (list): List of match dicts with unparsed player names.
+        teammatch_id (int, optional): Database id of teammatch. Defaults to None.
+    """    
     if matches is None:
         return
     for i, match in enumerate(matches):
@@ -202,7 +238,14 @@ def populate_matches(session, matches, teammatch_id=None):
 
                 session.add(match_obj)
 
-def populate_teammatches(engine, team_matches, matches):
+def populate_teammatches(engine : Engine, team_matches : list, matches : list):
+    """Populates the database with teammatches. Also calls function to create respective matches.
+
+    Args:
+        engine (Engine): Engine connected to the database.
+        team_matches (list): List of team_match dicts containing competition, teams, date and result.
+        matches (list): List of matches, matching indices of team matches.
+    """    
     with Session(engine) as session:
         session.begin()
         for i, match in enumerate(team_matches):
@@ -262,8 +305,10 @@ def populate_teammatches(engine, team_matches, matches):
 
 if __name__ == "__main__":
 
-    engine = create_engine("sqlite:///darts.db")
-    data_path = Path("./data_03_05_23")
+    db_path = "davs://jim@cloud.rhotertj.de/remote.php/webdav/Darts/darts.db"
+
+    data_path = Path("./data")
+    engine = create_engine(f"sqlite:///{db_path}")
     
     with open(data_path / "assocs_comps.pkl", "rb") as f:
         ac = pkl.load(f)

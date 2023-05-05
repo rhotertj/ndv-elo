@@ -1,4 +1,4 @@
-from sqlalchemy import select, insert, update, create_engine, Date, and_
+from sqlalchemy import select, insert, update, create_engine, Date, Engine
 from sqlalchemy.orm import Session, aliased
 from pathlib import Path
 import trueskill
@@ -6,16 +6,27 @@ import data
 import pickle as pkl
 from tqdm import tqdm
 
-def reset_ratings():
-    engine = create_engine("sqlite:///darts.db")
+def reset_ratings(engine : Engine):
+    """Reset all ratings back to (25, 8.33).
+
+    Args:
+        engine (Engine): Engine connected to the database.
+    """    
     with Session(engine) as session:
         stmt = update(data.SkillRating).values(rating_mu=25, rating_sigma=8.3333)
         session.execute(stmt)
         session.commit()
 
-def compute_ratings(competition):
+def compute_ratings(engine : Engine, competition : str):
+    """Compute ratings for a competition by iterating through all its matches.
+    Currently only takes singles into account.
+
+    Args:
+        engine (Engine): Engine connected to the database.
+        competition (str): Name of the competition.
+    """    
     # TODO Doubles
-    engine = create_engine("sqlite:///darts.db")
+    # TODO: We need to incorporate a season/ year:)
     with Session(engine) as session:
         stmt = select(data.TeamMatch, data.Competition).join(data.Competition).where(data.Competition.name == competition).order_by(data.TeamMatch.date)
         team_matches = session.execute(stmt).all()
