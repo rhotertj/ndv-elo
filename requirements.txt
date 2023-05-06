@@ -7,3 +7,5 @@ scipy
 seaborn
 tqdm
 notebook
+selenium
+webdriver-manager
