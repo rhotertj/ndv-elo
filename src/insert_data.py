@@ -1,10 +1,11 @@
 from sqlalchemy import select, insert, update, create_engine, Date, and_, Engine
 from sqlalchemy.orm import Session, aliased
 from tqdm import tqdm
-import datetime
+from datetime import datetime
 
 import os
 import pickle as pkl
+import json
 import data
 from pathlib import Path
 
@@ -21,7 +22,6 @@ def reorder_name(player : str):
     name_split = player.split(",")
     return f"{' '.join([n.strip() for n in name_split[1:]])} {name_split[0]}".strip()
 
-#TODO: Players have a club but no team, maybe create "temporary" id for more matches
 def populate_players(engine : Engine, players : list):
     """Populate the database with players.
 
@@ -34,33 +34,38 @@ def populate_players(engine : Engine, players : list):
     """    
     with Session(engine) as session:
         session.begin()
-        for id, name, club_name in players:
+        for assoc_id, name, club_name in players:
             name = name.strip()
             try:
-                player_obj = session.query(data.Player).where(data.Player.id == id).first()
+                # check if player exists by assoc_id
                 club_stmt = select(data.Club).where(data.Club.name == club_name)
                 club_obj = session.execute(club_stmt).first()
                 if not club_obj:
-                    raise ValueError(f"Club not found {club_name}")
+                    raise ValueError(f"Club not found {club_name}. Please create clubs before players.")
+                
+                player_obj = session.query(data.Player).where((data.Player.name == name) & (data.Player.club == club_obj[0].id)).first()
                 
                 if not player_obj:
-                    if "Spieler ist nicht" in id:
+                    if "Spieler ist nicht" in assoc_id:
                         continue
                     player_obj = data.Player(
                         name=name,
-                        id=id,
+                        association_id=str(assoc_id),
                         club=club_obj[0].id
                     )
                     session.add(player_obj)
+                else:
+                    # TODO See if this works
+                    if player_obj.association_id == "":
+                        update_stmt = update(data.Player).where(data.Player.id == player_obj[0].id).values(association_id=str(assoc_id))
+                        session.execute(update_stmt)
             except:
-                
                 session.rollback()
                 raise
-                
             else:
                 session.commit()
 
-def populate_clubs_and_teams(engine : Engine, clubs_and_teams : dict):
+def populate_clubs_and_teams(engine : Engine, clubs_and_teams : dict, season : datetime):
     """Populate the database with clubs and their respective team letters.
 
     Args:
@@ -80,7 +85,7 @@ def populate_clubs_and_teams(engine : Engine, clubs_and_teams : dict):
                 for team in teams:
                     team_obj = session.query(data.Team).where(and_(data.Team.rank == team, data.Team.club == club_obj.id)).first()
                     if not team_obj:
-                        team_obj = data.Team(rank=team, club=club_obj.id, year=datetime.date(2022, 1, 8))
+                        team_obj = data.Team(rank=team, club=club_obj.id, year=season)
                         session.add(team_obj)
             except:
                 session.rollback()
@@ -88,7 +93,7 @@ def populate_clubs_and_teams(engine : Engine, clubs_and_teams : dict):
             else:
                 session.commit()
         
-def populate_competitions(engine : Engine, associations_competitions : dict):
+def populate_competitions(engine : Engine, associations_competitions : dict, season: datetime):
     """Populate the database with associations and their respective competitions.
 
     Args:
@@ -105,7 +110,7 @@ def populate_competitions(engine : Engine, associations_competitions : dict):
                         comp_obj = data.Competition(
                             name=comp,
                             association=assoc,
-                            year=datetime.date(2022, 1, 8)
+                            year=season
                         )
                         session.add(comp_obj)
                 except:
@@ -114,8 +119,9 @@ def populate_competitions(engine : Engine, associations_competitions : dict):
                 else:
                     session.commit()
 
-def populate_matches(session : Session, matches : list, teammatch_id : int = None):
-    """Parses players and result from match info and creates singles or doubles match. Links to teammatch if ID is provided.
+# TODO Get players or create them with empty string assoc id
+def populate_matches(session : Session, matches : list, teammatch_obj : data.TeamMatch = None):
+    """Parses players and result from match info and creates singles or doubles match. Links to teammatch if provided.
 
     Args:
         session (Session): Open session to database.
@@ -145,6 +151,15 @@ def populate_matches(session : Session, matches : list, teammatch_id : int = Non
             away_player1 = reorder_name(away_player1)
             away_player2 = reorder_name(away_player2)
 
+
+        # get club of team
+        home_team_stmt = select(data.Team).where(teammatch_obj.home_team == data.Team.id)
+        home_team = session.execute(home_team_stmt).first()[0]
+
+        away_team_stmt = select(data.Team).where(teammatch_obj.away_team == data.Team.id)
+        away_team = session.execute(away_team_stmt).first()[0]
+        
+
         if not doubles:
 
             home_player = reorder_name(home_player)
@@ -158,27 +173,49 @@ def populate_matches(session : Session, matches : list, teammatch_id : int = Non
             ).join(
                     away_table, away_table.id == data.SinglesMatch.away_player
                 ).where(
-                    and_(away_table.name == away_player, home_table.name == home_player, data.SinglesMatch.team_match == teammatch_id)
+                    and_(away_table.name == away_player, home_table.name == home_player, data.SinglesMatch.team_match == teammatch_obj.id)
                 )
             singles_obj = session.execute(singles_stmt).first()
 
             if not singles_obj:
-                # TODO Sanity check club of player here!!!
-                # Pass team_match object instead of ID and check for club
-                home_stmt = select(data.Player.id).where(data.Player.name == home_player)
-                home_obj = session.execute(home_stmt).first()
-
-                away_stmt = select(data.Player.id).where(data.Player.name == away_player)
-                away_obj = session.execute(away_stmt).first()
-
-                if not all([home_obj, away_obj]):
-                    print(f"One or both of players f{(home_player, away_player)} could not be found.")
+                # TODO Check for club with teammatch obj, if player does not exist we create him with empty assoc id
+                # Beware name KEIN EINTRAG
+                if "KEIN EINTRAG" in (home_player, away_player):
+                    print("Skip", home_player, away_player)
                     continue
 
+                home_stmt = select(data.Player).where((data.Player.name == home_player) & (data.Player.club == home_team.club))
+                home_obj = session.execute(home_stmt).first()
+
+                away_stmt = select(data.Player).where((data.Player.name == away_player) & (data.Player.club == away_team.club))
+                away_obj = session.execute(away_stmt).first()
+
+                if not home_obj:
+                    print(f"One or both of players f{(home_player, away_player)} could not be found.")
+                    home_obj = data.Player(
+                        name=home_player,
+                        association_id="",
+                        club=home_team.club
+                    )
+                    session.add(home_obj)
+                    session.flush()
+                    session.refresh(home_obj)
+                    home_obj = [home_obj]
+                if not away_obj:
+                    away_obj = data.Player(
+                        name=away_player,
+                        association_id="",
+                        club=away_team.club
+                    )
+                    session.add(away_obj)
+                    session.flush()
+                    session.refresh(away_obj)
+                    away_obj = [away_obj]
+
                 match_obj = data.SinglesMatch(
-                    team_match=teammatch_id,
-                    home_player=home_obj[0],
-                    away_player=away_obj[0],
+                    team_match=teammatch_obj.id,
+                    home_player=home_obj[0].id,
+                    away_player=away_obj[0].id,
                     result=result,
                     match_number=match_number
                 )
@@ -192,6 +229,7 @@ def populate_matches(session : Session, matches : list, teammatch_id : int = Non
             home2_table = aliased(data.Player)
             away2_table = aliased(data.Player)
 
+            # TODO more checks here
             doubles_stmt = select(data.DoublesMatch).join(
                 home1_table, home1_table.id == data.DoublesMatch.home_player1
                 ).join(
@@ -205,7 +243,7 @@ def populate_matches(session : Session, matches : list, teammatch_id : int = Non
                     away_player1.strip() == away1_table.name,
                     home_player2.strip() == home2_table.name,
                     away_player2.strip() == away2_table.name,
-                    teammatch_id == data.DoublesMatch.team_match)
+                    teammatch_obj.id == data.DoublesMatch.team_match)
                 )
             doubles_obj = session.execute(doubles_stmt).first()
             if not doubles_obj:
@@ -227,7 +265,7 @@ def populate_matches(session : Session, matches : list, teammatch_id : int = Non
                     continue
                 
                 match_obj = data.DoublesMatch(
-                    team_match=teammatch_id,
+                    team_match=teammatch_obj.id,
                     home_player1=home1_obj[0].id,
                     away_player1=away1_obj[0].id,
                     home_player2=home2_obj[0].id,
@@ -250,7 +288,7 @@ def populate_teammatches(engine : Engine, team_matches : list, matches : list):
         session.begin()
         for i, match in enumerate(team_matches):
             # get competition id and home team id
-            date = match["date"]
+            date = datetime.fromisoformat(match["date"])
             try:
                 
                 comp_stmt = select(data.Competition.id).where(and_(data.Competition.name == match["competition"], data.Competition.association == match["association"]))
@@ -289,12 +327,11 @@ def populate_teammatches(engine : Engine, team_matches : list, matches : list):
                     session.add(teammatch_ob)
                     session.flush()
                     session.refresh(teammatch_ob)
-                    team_match_id = teammatch_ob.id
                 else:
-                    team_match_id = tm_obj[0].id
+                    teammatch_ob = tm_obj[0]
 
                 
-                populate_matches(session, matches[i], team_match_id)
+                populate_matches(session, matches[i], teammatch_ob)
                 
             except:
                 session.rollback()
@@ -305,46 +342,29 @@ def populate_teammatches(engine : Engine, team_matches : list, matches : list):
 
 if __name__ == "__main__":
 
-    db_path = "davs://jim@cloud.rhotertj.de/remote.php/webdav/Darts/darts.db"
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='Populate the database.'
+    )
 
-    data_path = Path("./data")
-    engine = create_engine(f"sqlite:///{db_path}")
+    parser.add_argument('-db', "--database", help="Path to the database.", required=True)
+    parser.add_argument("--data", help="Path to the data to be inserted. Expecting a json file", required=True)
+    args = parser.parse_args()
+
+
+    data_path = Path(args.data)
+    engine = create_engine(f"sqlite:///{args.database}")
     
-    with open(data_path / "assocs_comps.pkl", "rb") as f:
-        ac = pkl.load(f)
+    with open(data_path, "r") as f:
+        crawled_results = json.load(f)
+    crawled_results["season"] = datetime.fromisoformat(crawled_results["season"])
 
-    populate_competitions(engine, ac)
+    populate_competitions(engine, crawled_results["crawled_competitions"], season=crawled_results["season"])
 
-    
-
-    club_pickles = [f for f in os.listdir(data_path) if f.startswith("teamsclubs")]
-    player_pickles = [f for f in os.listdir(data_path) if f.startswith("players")]
-    matches_pickles = [f for f in os.listdir(data_path) if f.startswith("matches") and ("NDV" in f or "DBH" in f)]
-    teammatches_pickles = [f for f in os.listdir(data_path) if f.startswith("matchdays") and ("NDV" in f or "DBH" in f)]
-
-    for i in range(len(club_pickles)):
-
-        clubfile = club_pickles[i]
-        playerfile = player_pickles[i]
-        
-        with open(data_path / playerfile, "rb") as f:
-            players = pkl.load(f, encoding="UTF-8")
-        with open(data_path / clubfile, "rb") as f:
-            clubs = pkl.load(f, encoding="UTF-8")
-
-        populate_clubs_and_teams(engine, clubs)
-        populate_players(engine, players)
-
-    for i in range(len(matches_pickles)):
-        matchfile = matches_pickles[i]
-        teammatchfile = teammatches_pickles[i]
-
-        with open(data_path / teammatchfile, "rb") as f:
-            team_matches = pkl.load(f, encoding="UTF-8")
-        with open(data_path / matchfile, "rb") as f:
-            matches = pkl.load(f, encoding="UTF-8")
-
-        
-        populate_teammatches(engine, team_matches, matches)
+    for a, competitions in crawled_results["crawled_competitions"].items():
+        for c in competitions:
+            populate_clubs_and_teams(engine, crawled_results[a][c]["clubs_teams"], season=crawled_results["season"])
+            populate_players(engine, crawled_results[a][c]["players"])
+            populate_teammatches(engine, crawled_results[a][c]["team_matches"], crawled_results[a][c]["matches"])
 
     

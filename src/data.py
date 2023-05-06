@@ -13,12 +13,13 @@ class Player(Base):
 
     __tablename__ = "player_table"
 
-    id = Column(Integer, unique=True, primary_key=True)
+    id = Column(Integer, unique=True, autoincrement=True, primary_key=True)
     name = Column(String)
     club = Column(Integer, ForeignKey("club_table.id"), nullable=True)
+    association_id = Column(String)
 
     def __repr__(self) -> str:
-        return f"Player {self.id=} {self.name=}"
+        return f"Player {self.club=} {self.name=}, {self.association_id=}"
     
 class Competition(Base):
 
@@ -110,5 +111,15 @@ class SkillRating(Base):
         return f"SkillRating {self.id=} {self.player=} {self.competition=} {self.rating_mu=} {self.rating_sigma=}"
 
 if "__main__" == __name__:
-    engine = sqlalchemy.create_engine("sqlite:///darts.db")
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='Create a new database'
+    )
+
+    parser.add_argument('filename')
+    args = parser.parse_args()
+
+    fn = args.filename
+
+    engine = sqlalchemy.create_engine(f"sqlite:///{fn}")
     Base.metadata.create_all(engine)

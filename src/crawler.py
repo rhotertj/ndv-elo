@@ -11,6 +11,7 @@ from selenium.webdriver.support.expected_conditions import element_to_be_clickab
 from collections import defaultdict
 from datetime import datetime
 import pickle as pkl
+import json
 from pathlib import Path
 import os
 
@@ -258,33 +259,53 @@ class Crawler():
 
 if "__main__" == __name__:
     # TODO: Run crawler for NDV and DBH, pickle results to avoid crawling too often
-    data_path = Path("./data_03_05_23")
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='Crawl data from 2k app.'
+    )
+
+    parser.add_argument('--date', help="Matches before this date are ignored. Expects YYYY-MM-DD.", required=False)
+    parser.add_argument("--path", help="Destination for the crawled data.", required=True)
+    parser.add_argument('--season', help="What season we crawl. Expects YYYY (will be set to first of august that year.)", required=True)
+    parser.add_argument("--associations", help="Limit associations to be crawled.", nargs="*", default=["DBH", "NDV"])
+    args = parser.parse_args()
+
+    data_path = Path(args.path)
     os.makedirs(data_path, exist_ok=True)
+    if not args.date:
+        from_date = datetime(2022, 8, 1)
+    else:
+        from_date = datetime.fromisoformat(args.date)
+    
+    season = datetime(args.season, 8, 1)
+
+    results = {}
+    results["from_date"] = from_date.isoformat()
+    results["crawled_date"] = datetime.now().isoformat()
+    results["season"] = season.isoformat()
+    results["crawled_competitions"] = {}
     with Crawler() as crawler:
-        a_co = {}
-        # assocs = crawler.get_associations()
-        assocs = ["NDV", "DBH"]
+        if args.associations[0] == "all":
+            assocs = crawler.get_associations()
+        else:
+            assocs = args.associations
         for a in assocs:
             comps = crawler.get_competitions(a)
-            a_co[a] = comps
+            results["crawled_competitions"][a] = []
             for comp in comps:
-                teams, players = crawler.get_clubs_and_teams([a], [comp])
+                results["crawled_competitions"][a].append(comp)
+                results[a] = {comp : {}}
+                clubs_teams, players = crawler.get_clubs_and_teams([a], [comp])
                 matchdays, matches = crawler.get_matches([a], [comp])
-                with open(data_path / f"teamsclubs_{a}_{comp.replace('/', '')}.pkl", "wb+") as f:
-                    pkl.dump(teams, f)
+                results[a][comp]["clubs_teams"] = {club : list(teams) for club, teams in clubs_teams.items()}
+                results[a][comp]["matches"] = matches
+                results[a][comp]["players"] = players
+                for match in matchdays:
+                    match["date"] = match["date"].isoformat()
+                results[a][comp]["team_matches"] = matchdays
 
-                with open(data_path / f"players_{a}_{comp.replace('/', '')}.pkl", "wb+") as f:
-                    pkl.dump(players, f)
-
-                with open(data_path / f"matchdays_{a}_{comp}.pkl", "wb+") as f:
-                    pkl.dump(matchdays, f)
-
-                with open(data_path / f"matches_{a}_{comp}.pkl", "wb+") as f:
-                    pkl.dump(matches, f)
-
+    json.dump(data_path)
     
-    with open("assocs_comps.pkl", "wb+") as f:
-        pkl.dump(a_co, f)
 
     
 

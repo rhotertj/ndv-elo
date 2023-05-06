@@ -122,7 +122,7 @@ def get_positions_for_player(engine : Engine, player_id : int):
 
 
 if __name__ == "__main__":
-    db_path = "./darts.db"
+    db_path = "./darts_json.db"
 
     engine = create_engine(f"sqlite:///{db_path}")
     lb = leaderboard(engine, "DBH Bezirksliga 2")
