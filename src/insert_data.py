@@ -12,6 +12,8 @@ from pathlib import Path
 def reorder_name(player : str):
     """Reorder lastname, name(s) format into name(s) surname.
 
+    Müller, Hans-Joachim Christoph -> Hans-Joachim Christoph Müller.
+
     Args:
         player (str): Player name.
 
@@ -119,7 +121,6 @@ def populate_competitions(engine : Engine, associations_competitions : dict, sea
                 else:
                     session.commit()
 
-# TODO Get players or create them with empty string assoc id
 def populate_matches(session : Session, matches : list, teammatch_obj : data.TeamMatch = None):
     """Parses players and result from match info and creates singles or doubles match. Links to teammatch if provided.
 
@@ -191,7 +192,6 @@ def populate_matches(session : Session, matches : list, teammatch_obj : data.Tea
                 away_obj = session.execute(away_stmt).first()
 
                 if not home_obj:
-                    print(f"One or both of players f{(home_player, away_player)} could not be found.")
                     home_obj = data.Player(
                         name=home_player,
                         association_id="",
@@ -229,7 +229,6 @@ def populate_matches(session : Session, matches : list, teammatch_obj : data.Tea
             home2_table = aliased(data.Player)
             away2_table = aliased(data.Player)
 
-            # TODO more checks here
             doubles_stmt = select(data.DoublesMatch).join(
                 home1_table, home1_table.id == data.DoublesMatch.home_player1
                 ).join(
@@ -240,9 +239,13 @@ def populate_matches(session : Session, matches : list, teammatch_obj : data.Tea
                     home2_table, home2_table.id == data.DoublesMatch.home_player2
                 ).where( # lets hope they dont switch around, i dont want to check all combinations
                     and_(home_player1.strip() == home1_table.name,
+                    home_team.club == home1_table.club,
                     away_player1.strip() == away1_table.name,
+                    away_team.club == away1_table.club,
                     home_player2.strip() == home2_table.name,
+                    home_team.club == home2_table.club,
                     away_player2.strip() == away2_table.name,
+                    away_team.club == away2_table.club,
                     teammatch_obj.id == data.DoublesMatch.team_match)
                 )
             doubles_obj = session.execute(doubles_stmt).first()
@@ -259,11 +262,51 @@ def populate_matches(session : Session, matches : list, teammatch_obj : data.Tea
                 away2_stmt = select(data.Player).where(data.Player.name == away_player2.strip())
                 away2_obj = session.execute(away2_stmt).first()
 
-                if not all([home1_obj, home2_obj, away1_obj, away2_obj]):
-                    print("Error at", match, flush=True)
-                    print(f"One of these players does not exist: {(home_player1, home_player2, away_player1, away_player2)}")
-                    continue
-                
+                if not home1_obj:
+                    home1_obj = data.Player(
+                        name=home_player1,
+                        association_id="",
+                        club=home_team.club
+                    )
+                    session.add(home1_obj)
+                    session.flush()
+                    session.refresh(home1_obj)
+                    home1_obj = [home1_obj]
+                    
+                if not home2_obj:
+                    home2_obj = data.Player(
+                        name=home_player2,
+                        association_id="",
+                        club=home_team.club
+                    )
+                    session.add(home2_obj)
+                    session.flush()
+                    session.refresh(home2_obj)
+                    home2_obj = [home2_obj]
+
+                if not away1_obj:
+                    away1_obj = data.Player(
+                        name=away_player1,
+                        association_id="",
+                        club=away_team.club
+                    )
+                    session.add(away1_obj)
+                    session.flush()
+                    session.refresh(away1_obj)
+                    away1_obj = [away1_obj]
+
+                if not away2_obj:
+                    away2_obj = data.Player(
+                        name=away_player2,
+                        association_id="",
+                        club=away_team.club
+                    )
+                    session.add(away2_obj)
+                    session.flush()
+                    session.refresh(away2_obj)
+                    away2_obj = [away2_obj]
+                    
+            
                 match_obj = data.DoublesMatch(
                     team_match=teammatch_obj.id,
                     home_player1=home1_obj[0].id,
@@ -276,7 +319,7 @@ def populate_matches(session : Session, matches : list, teammatch_obj : data.Tea
 
                 session.add(match_obj)
 
-def populate_teammatches(engine : Engine, team_matches : list, matches : list):
+def populate_teammatches(engine : Engine, team_matches : list, matches : list, season : datetime):
     """Populates the database with teammatches. Also calls function to create respective matches.
 
     Args:
@@ -291,7 +334,7 @@ def populate_teammatches(engine : Engine, team_matches : list, matches : list):
             date = datetime.fromisoformat(match["date"])
             try:
                 
-                comp_stmt = select(data.Competition.id).where(and_(data.Competition.name == match["competition"], data.Competition.association == match["association"]))
+                comp_stmt = select(data.Competition.id).where(and_(data.Competition.name == match["competition"], data.Competition.association == match["association"], data.Competition.year == season))
                 comp_obj = session.execute(comp_stmt).first()
 
                 home_stmt = select(data.Team.id).join(data.Club).where(and_(data.Team.rank == match["home_team"][-1], data.Club.name == match["home_team"][:-2]))
@@ -365,6 +408,6 @@ if __name__ == "__main__":
         for c in competitions:
             populate_clubs_and_teams(engine, crawled_results[a][c]["clubs_teams"], season=crawled_results["season"])
             populate_players(engine, crawled_results[a][c]["players"])
-            populate_teammatches(engine, crawled_results[a][c]["team_matches"], crawled_results[a][c]["matches"])
+            populate_teammatches(engine, crawled_results[a][c]["team_matches"], crawled_results[a][c]["matches"], season=crawled_results["season"])
 
     

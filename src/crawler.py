@@ -121,7 +121,7 @@ class Crawler():
     def _close_match_overlay(self):
         dialogue = self.browser.find_element(By.ID, "showligadashDialog")
         button = dialogue.find_element(By.TAG_NAME, "button")
-        wait = WebDriverWait(self.browser, timeout=10).until(element_to_be_clickable(button))
+        wait = WebDriverWait(self.browser, timeout=15).until(element_to_be_clickable(button))
         time.sleep(1)
         # self.browser.execute_script("arguments[0].click();", button)
         button.click()
@@ -258,7 +258,6 @@ class Crawler():
 
 
 if "__main__" == __name__:
-    # TODO: Run crawler for NDV and DBH, pickle results to avoid crawling too often
     import argparse
     parser = argparse.ArgumentParser(
         description='Crawl data from 2k app.'
@@ -266,12 +265,12 @@ if "__main__" == __name__:
 
     parser.add_argument('--date', help="Matches before this date are ignored. Expects YYYY-MM-DD.", required=False)
     parser.add_argument("--path", help="Destination for the crawled data.", required=True)
-    parser.add_argument('--season', help="What season we crawl. Expects YYYY (will be set to first of august that year.)", required=True)
+    parser.add_argument('--season', help="What season we crawl. Expects YYYY (will be set to first of august that year.)", required=True, type=int)
     parser.add_argument("--associations", help="Limit associations to be crawled.", nargs="*", default=["DBH", "NDV"])
     args = parser.parse_args()
 
     data_path = Path(args.path)
-    os.makedirs(data_path, exist_ok=True)
+    # os.makedirs(data_path, exist_ok=True)
     if not args.date:
         from_date = datetime(2022, 8, 1)
     else:
@@ -304,7 +303,8 @@ if "__main__" == __name__:
                     match["date"] = match["date"].isoformat()
                 results[a][comp]["team_matches"] = matchdays
 
-    json.dump(data_path)
+    with open(data_path, "w+") as f:
+        json.dump(results, f)
     
 
     

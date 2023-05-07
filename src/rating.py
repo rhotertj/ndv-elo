@@ -5,6 +5,8 @@ import trueskill
 import data
 import pickle as pkl
 from tqdm import tqdm
+from datetime import datetime
+from common_queries import get_associations_and_competitions
 
 def reset_ratings(engine : Engine):
     """Reset all ratings back to (25, 8.33).
@@ -17,7 +19,7 @@ def reset_ratings(engine : Engine):
         session.execute(stmt)
         session.commit()
 
-def compute_ratings(engine : Engine, competition : str):
+def compute_ratings(engine : Engine, competition : data.Competition):
     """Compute ratings for a competition by iterating through all its matches.
     Currently only takes singles into account.
 
@@ -26,26 +28,33 @@ def compute_ratings(engine : Engine, competition : str):
         competition (str): Name of the competition.
     """    
     # TODO Doubles
-    # TODO: We need to incorporate a season/ year:)
     with Session(engine) as session:
-        stmt = select(data.TeamMatch, data.Competition).join(data.Competition).where(data.Competition.name == competition).order_by(data.TeamMatch.date)
+        stmt = select(data.TeamMatch).where(data.TeamMatch.competition == competition.id).order_by(data.TeamMatch.date)
         team_matches = session.execute(stmt).all()
         for match in team_matches:
-            singles_stmt = select(data.SinglesMatch).where(data.SinglesMatch.team_match == match[0].id)
+            match = match[0]
+            if match.used_for_rating:
+                continue
+            else:
+                update_stmt = update(data.TeamMatch).where(data.TeamMatch.id == match.id).values(used_for_rating=True)
+                session.execute(update_stmt)
+
+            singles_stmt = select(data.SinglesMatch).where(data.SinglesMatch.team_match == match.id)
             # doubles_stmt = select(data.DoublesMatch).where(data.DoublesMatch.team_match == match[0].id)
             singles = session.execute(singles_stmt).all()
             # doubles = session.execute(doubles_stmt).all()
             
             for single in singles:
                 
-                home_player_rating_stmt = select(data.SkillRating).where((data.SkillRating.player == single[0].home_player) & (data.SkillRating.competition == match[1].id))
+                home_player_rating_stmt = select(data.SkillRating).where((data.SkillRating.player == single[0].home_player) & (data.SkillRating.competition == competition.id))
                 home_player_rating = session.execute(home_player_rating_stmt).first()
                 if not home_player_rating:
                     home_player_rating = data.SkillRating(
                         player=single[0].home_player,
-                        competition=match[1].id,
+                        competition=competition.id,
                         rating_mu=25,
-                        rating_sigma=8.3333
+                        rating_sigma=8.3333,
+                        latest_update=match.date
                     )
                     session.add(home_player_rating)
                     session.commit()
@@ -53,14 +62,15 @@ def compute_ratings(engine : Engine, competition : str):
                 else:
                     home_player_rating = home_player_rating[0]
 
-                away_player_rating_stmt = select(data.SkillRating).where((data.SkillRating.player == single[0].away_player) & (data.SkillRating.competition == match[1].id))
+                away_player_rating_stmt = select(data.SkillRating).where((data.SkillRating.player == single[0].away_player) & (data.SkillRating.competition == competition.id))
                 away_player_rating = session.execute(away_player_rating_stmt).first()
                 if not away_player_rating:
                     away_player_rating = data.SkillRating(
                         player=single[0].away_player,
-                        competition=match[1].id,
+                        competition=competition.id,
                         rating_mu=25,
-                        rating_sigma=8.3333
+                        rating_sigma=8.3333,
+                        latest_update=match.date
                     )
                     session.add(away_player_rating)
                     session.commit()
@@ -79,11 +89,13 @@ def compute_ratings(engine : Engine, competition : str):
 
                 update_home_stmt = update(data.SkillRating).where(data.SkillRating.id == home_player_rating.id).values(
                     rating_mu=home_ts.mu,
-                    rating_sigma=home_ts.sigma
+                    rating_sigma=home_ts.sigma,
+                    latest_update=match.date
                 )
                 update_away_stmt = update(data.SkillRating).where(data.SkillRating.id == away_player_rating.id).values(
                     rating_mu=away_ts.mu,
-                    rating_sigma=away_ts.sigma
+                    rating_sigma=away_ts.sigma,
+                    latest_update=match.date
                 )
                 session.execute(update_home_stmt)
                 session.execute(update_away_stmt)
@@ -91,16 +103,27 @@ def compute_ratings(engine : Engine, competition : str):
 
     
 if __name__ == "__main__":
-    data_path = Path("./data_03_05_23")
-    
-    with open(data_path / "assocs_comps.pkl", "rb") as f:
-        assocs_comps = pkl.load(f)
+    import argparse
+    parser = argparse.ArgumentParser(
+        description='Populate the database.'
+    )
 
+    parser.add_argument('-db', "--database", help="Path to the database.", required=True)
+    parser.add_argument('--season', help="What season we crawl. Expects YYYY (will be set to first of august that year.)", required=True, type=int)
+
+    args = parser.parse_args()
+    season = datetime(args.season, 8, 1)
+    engine = create_engine(f"sqlite:///{args.database}")
+
+    competitions = get_associations_and_competitions(engine, association="DBH", season=season)
+    for c in competitions:
+        c = c[0]
+        compute_ratings(engine, c)
     # reset_ratings()
 
-    for association in ["DBH", "NDV"]:
-        print("Compute ratings for", association)
-        for comp in tqdm(assocs_comps[association]):
-            compute_ratings(comp)
+    # for association in ["DBH", "NDV"]:
+    #     print("Compute ratings for", association)
+    #     for comp in tqdm(assocs_comps[association]):
+    #         compute_ratings(comp)
 
     #SELECT * FROM skillrating_table JOIN player_table ON skillrating_table.player = player_table.id ORDER BY skillrating_table.rating_mu DESC

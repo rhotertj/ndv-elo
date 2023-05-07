@@ -1,7 +1,7 @@
 import sqlalchemy
 
 from sqlalchemy import ForeignKey
-from sqlalchemy import Integer, Column, String, DateTime, Float
+from sqlalchemy import Integer, Column, String, DateTime, Float, Boolean
 
 from sqlalchemy.orm import DeclarativeBase
 
@@ -66,6 +66,7 @@ class TeamMatch(Base):
     result = Column(String)
     home_team = Column(Integer, ForeignKey("team_table.id"))
     away_team = Column(Integer, ForeignKey("team_table.id"))
+    used_for_rating = Column(Boolean, default=False)
 
     def __repr__(self) -> str:
         return f"teammatch {self.id=} {self.date=} {self.competition=} {self.result=} {self.home_team=} {self.away_team=}"
@@ -106,6 +107,7 @@ class SkillRating(Base):
     competition = Column(Integer, ForeignKey("competition_table.id"))
     rating_mu = Column(Float)
     rating_sigma = Column(Float)
+    latest_update = Column(DateTime)
 
     def __repr__(self) -> str:
         return f"SkillRating {self.id=} {self.player=} {self.competition=} {self.rating_mu=} {self.rating_sigma=}"

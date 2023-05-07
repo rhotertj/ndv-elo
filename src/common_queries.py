@@ -24,6 +24,15 @@ def leaderboard(engine: Engine, competition : str):
     leaderboard = sorted(leaderboard, key = lambda p : p.rating, reverse=True)
     return leaderboard
 
+def get_associations_and_competitions(engine : Engine, association: str = None, season : datetime = None):
+    with Session(engine) as session:
+        stmt = select(data.Competition)
+        if season:
+            stmt = stmt.where(data.Competition.year == season)
+        if association:
+            stmt = stmt.where(data.Competition.association == association)
+        result = session.execute(stmt).all()
+    return result
 
 
 def get_previous_matches(engine : Engine, my_players : list, other_players: list):
@@ -122,7 +131,7 @@ def get_positions_for_player(engine : Engine, player_id : int):
 
 
 if __name__ == "__main__":
-    db_path = "./darts_json.db"
+    db_path = "./darts-json.db"
 
     engine = create_engine(f"sqlite:///{db_path}")
     lb = leaderboard(engine, "DBH Bezirksliga 2")
