@@ -291,9 +291,10 @@ if "__main__" == __name__:
         for a in assocs:
             comps = crawler.get_competitions(a)
             results["crawled_competitions"][a] = []
+            results[a] = {}
             for comp in comps:
                 results["crawled_competitions"][a].append(comp)
-                results[a] = {comp : {}}
+                results[a][comp] = {}
                 clubs_teams, players = crawler.get_clubs_and_teams([a], [comp])
                 matchdays, matches = crawler.get_matches([a], [comp])
                 results[a][comp]["clubs_teams"] = {club : list(teams) for club, teams in clubs_teams.items()}

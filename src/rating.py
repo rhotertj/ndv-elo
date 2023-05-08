@@ -78,7 +78,11 @@ def compute_ratings(engine : Engine, competition : data.Competition):
                 else:
                     away_player_rating = away_player_rating[0]
 
-                home_wins = single[0].result[0] > single[0].result[2] # h:a
+                try:
+                    home_wins = single[0].result[0] > single[0].result[2] # h:a
+                except:
+                    print("Skipping", single)
+                    continue
                 home_ts = trueskill.Rating(mu=home_player_rating.rating_mu, sigma=home_player_rating.rating_sigma)
                 away_ts = trueskill.Rating(mu=away_player_rating.rating_mu, sigma=away_player_rating.rating_sigma)
                 
@@ -119,11 +123,3 @@ if __name__ == "__main__":
     for c in competitions:
         c = c[0]
         compute_ratings(engine, c)
-    # reset_ratings()
-
-    # for association in ["DBH", "NDV"]:
-    #     print("Compute ratings for", association)
-    #     for comp in tqdm(assocs_comps[association]):
-    #         compute_ratings(comp)
-
-    #SELECT * FROM skillrating_table JOIN player_table ON skillrating_table.player = player_table.id ORDER BY skillrating_table.rating_mu DESC

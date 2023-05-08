@@ -59,7 +59,7 @@ def populate_players(engine : Engine, players : list):
                 else:
                     # TODO See if this works
                     if player_obj.association_id == "":
-                        update_stmt = update(data.Player).where(data.Player.id == player_obj[0].id).values(association_id=str(assoc_id))
+                        update_stmt = update(data.Player).where(data.Player.id == player_obj.id).values(association_id=str(assoc_id))
                         session.execute(update_stmt)
             except:
                 session.rollback()
