@@ -131,4 +131,5 @@ dmypy.json
 ### custom
 *.pkl
 *.db
-data*
+img/
+*.zip

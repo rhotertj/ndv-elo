@@ -277,6 +277,7 @@ if "__main__" == __name__:
         from_date = datetime.fromisoformat(args.date)
     
     season = datetime(args.season, 8, 1)
+    print("Only checking matches past", from_date)
 
     results = {}
     results["from_date"] = from_date.isoformat()
@@ -296,7 +297,7 @@ if "__main__" == __name__:
                 results["crawled_competitions"][a].append(comp)
                 results[a][comp] = {}
                 clubs_teams, players = crawler.get_clubs_and_teams([a], [comp])
-                matchdays, matches = crawler.get_matches([a], [comp])
+                matchdays, matches = crawler.get_matches([a], [comp], from_date=from_date)
                 results[a][comp]["clubs_teams"] = {club : list(teams) for club, teams in clubs_teams.items()}
                 results[a][comp]["matches"] = matches
                 results[a][comp]["players"] = players

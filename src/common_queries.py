@@ -8,19 +8,29 @@ from collections import namedtuple
 import data
 
 
-def leaderboard(engine: Engine, competition : str):
+def leaderboard(engine: Engine, competition : str, season : datetime, conservative=True):
     # return player and their conservative rating mu - 3sigma
-    PlayerRating = namedtuple("PlayerRating", ["name", "id", "rating"])
+    PlayerRating = namedtuple("PlayerRating", ["name", "id", "rating", "club"])
     with Session(engine) as session:
         # select competition from name
-        comp_stmt = select(data.Competition.id).where(data.Competition.name == competition)
+        comp_stmt = select(data.Competition.id).where((data.Competition.name == competition) & (data.Competition.year == season))
         comp_id = session.execute(comp_stmt).first()
-        rating_stmt = select(data.SkillRating, data.Player).where((data.SkillRating.player == data.Player.id) & (data.SkillRating.competition == comp_id[0]))
+        rating_stmt = select(data.SkillRating, data.Player, data.Club).where(
+            (data.SkillRating.player == data.Player.id) & 
+            (data.SkillRating.competition == comp_id[0]) & 
+            (data.Player.club == data.Club.id)
+        )
         ratings = session.execute(rating_stmt).all()
         leaderboard = []
-        for rating, player in ratings:
-            player_rating = PlayerRating(player.name, player.id, rating.rating_mu - (3 * rating.rating_sigma))
+        for rating, player, club in ratings:
+            if player.association_id == "":
+                continue
+            r = rating.rating_mu - (3 * rating.rating_sigma)
+            if not conservative:
+                r = rating.rating_mu
+            player_rating = PlayerRating(player.name, player.id, r, club.name)
             leaderboard.append(player_rating)
+    
     leaderboard = sorted(leaderboard, key = lambda p : p.rating, reverse=True)
     return leaderboard
 
@@ -114,7 +124,7 @@ def get_player_skill_for_team(engine : Engine, club_name : str, competition : st
                 continue
             rating_stmt = select(data.SkillRating).where((data.SkillRating.player == player.id) & (data.SkillRating.competition == comp_id[0]))
             rating = session.execute(rating_stmt).first()
-            player_rating = PlayerTuple(player.name, player.id, trueskill.Rating(rating[0].rating_mu, rating[0].rating_sigma))
+            player_rating = PlayerTuple(player.name, player.association_id, trueskill.Rating(rating[0].rating_mu, rating[0].rating_sigma))
             players_retrieved.append(player.id)
 
             ratings.append(player_rating)

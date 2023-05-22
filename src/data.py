@@ -118,7 +118,7 @@ if "__main__" == __name__:
         description='Create a new database'
     )
 
-    parser.add_argument('filename')
+    parser.add_argument('--filename')
     args = parser.parse_args()
 
     fn = args.filename

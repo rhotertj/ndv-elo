@@ -83,6 +83,7 @@ def compute_ratings(engine : Engine, competition : data.Competition):
                 except:
                     print("Skipping", single)
                     continue
+                print("Updating for", single)
                 home_ts = trueskill.Rating(mu=home_player_rating.rating_mu, sigma=home_player_rating.rating_sigma)
                 away_ts = trueskill.Rating(mu=away_player_rating.rating_mu, sigma=away_player_rating.rating_sigma)
                 
