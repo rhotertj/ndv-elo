@@ -15,7 +15,8 @@ import json
 from pathlib import Path
 import os
 
-NDV_URL = "https://ndv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=112&filVbsubKey=1&filStaffKey=667&filStaffFsGrpdataKey=0#"
+#NDV_URL = "https://ndv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=112&filVbsubKey=1&filStaffKey=667&filStaffFsGrpdataKey=0#"
+NDV_URL = "https://ddv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=126&filVbsubKey=1&filStaffKey=823&filStaffFsGrpdataKey=0"
 
 class Crawler():
 
@@ -137,6 +138,7 @@ class Crawler():
 
     def get_competitions(self, association):
         self._choose_association(association)
+        time.sleep(1)
         dashboard = self.browser.find_element(By.ID, "showligadashDashboard")
         header_rows = dashboard.find_element(By.CLASS_NAME, "well-sm")
         _, competition_div = header_rows.find_elements(By.XPATH, "./*")
@@ -219,6 +221,7 @@ class Crawler():
                 self._choose_tab("Spielplan")
                 time.sleep(1)
                 self._choose_from_dropdown("Spielplan")
+                time.sleep(1)
                 dashboard = self.browser.find_element(By.ID, "showGameplanAreaData")
                 matchday_bodys = dashboard.find_elements(By.TAG_NAME, "tbody")
                 for matchday in matchday_bodys:
@@ -271,12 +274,11 @@ if "__main__" == __name__:
 
     data_path = Path(args.path)
     # os.makedirs(data_path, exist_ok=True)
+    season = datetime(args.season, 8, 1)
     if not args.date:
-        from_date = datetime(2022, 8, 1)
+        from_date = season
     else:
         from_date = datetime.fromisoformat(args.date)
-    
-    season = datetime(args.season, 8, 1)
     print("Only checking matches past", from_date)
 
     results = {}
