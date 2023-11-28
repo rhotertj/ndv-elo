@@ -5,6 +5,7 @@ local area and use them to assign a skill level to all players, similar to the c
 
 I use the TrueSkill system to evaluate a player's performance to get ratings that "converge" with only a handful of matches.
 With decent ratings, it is possible to calculate the probability of the outcome of any match.
+A short summary of how TrueSkill works can be found [here](https://www.microsoft.com/en-us/research/project/trueskill-ranking-system).
 
 ## TODOs
 
@@ -24,4 +25,3 @@ Create database and populate it :
 python src/data.py --filename [DB_PATH] && \
 python src/insert_data.py -db [DB_PATH] --data [DATA_PATH]
 ```
-
