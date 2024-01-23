@@ -8,6 +8,8 @@ from sqlalchemy.orm import DeclarativeBase
 class Base(DeclarativeBase):
     pass
 
+# Human(uniquetokenid, name)
+# add human_id to player as fk
 
 class Player(Base):
 

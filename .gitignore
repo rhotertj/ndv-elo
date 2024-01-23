@@ -1,3 +1,9 @@
+# node
+rankings/node_modules/
+rankings/package-lock.json
+rankings/public/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
