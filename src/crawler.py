@@ -1,26 +1,27 @@
+import json
 import time
-from bs4 import BeautifulSoup
-from selenium.webdriver.firefox.options import Options
-from selenium import webdriver
-from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.select import Select
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support.expected_conditions import element_to_be_clickable, invisibility_of_element, visibility_of
-
 from collections import defaultdict
 from datetime import datetime
-import pickle as pkl
-import json
 from pathlib import Path
-import os
+
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.expected_conditions import (
+    element_to_be_clickable,
+    invisibility_of_element,
+)
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.wait import WebDriverWait
 
 data_sources = {
     2022: "https://ndv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=112&filVbsubKey=1&filStaffKey=667&filStaffFsGrpdataKey=0#",
-    2023: "https://ddv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=126&filVbsubKey=1&filStaffKey=823&filStaffFsGrpdataKey=0"
+    2023: "https://ddv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=126&filVbsubKey=1&filStaffKey=823&filStaffFsGrpdataKey=0",
 }
 
-class Crawler():
+
+class Crawler2K:
 
     def __init__(self, season) -> None:
         self.url = self.data_sources[season]
@@ -29,7 +30,9 @@ class Crawler():
         options = Options()
         # self.browser = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=options)
         # docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-firefox:4.17.0-20240123
-        self.browser = webdriver.Remote(command_executor="http://localhost:4444", options=options)
+        self.browser = webdriver.Remote(
+            command_executor="http://localhost:4444", options=options
+        )
         self.browser.implicitly_wait(5)
         self.browser.get(self.url)
         self.browser.execute_script("window.loadWaitTime = 10000 * 1000000;")
@@ -37,7 +40,7 @@ class Crawler():
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.browser.quit()
-    
+
     @property
     def page_content(self):
         return BeautifulSoup(self.browser.page_source, "html.parser")
@@ -80,7 +83,10 @@ class Crawler():
         tab_bar = dash.find_element(By.CLASS_NAME, "nav-tabs")
         tabs = tab_bar.find_elements(By.TAG_NAME, "a")
         for t in tabs:
-            if t.find_element(By.TAG_NAME, "span").get_attribute("innerHTML").strip() == tab:
+            if (
+                t.find_element(By.TAG_NAME, "span").get_attribute("innerHTML").strip()
+                == tab
+            ):
                 t.click()
                 break
 
@@ -88,21 +94,30 @@ class Crawler():
 
         try:
             # this is only visible once we have clicked on the first "spielbericht"
-            WebDriverWait(self.browser, timeout=1).until(invisibility_of_element(self.browser.find_element(By.CLASS_NAME, "modal-backdrop")))
-        except:
+            WebDriverWait(self.browser, timeout=1).until(
+                invisibility_of_element(
+                    self.browser.find_element(By.CLASS_NAME, "modal-backdrop")
+                )
+            )
+        # trunk-ignore(bandit/B110)
+        except Exception:
             pass
 
         # crashes when game has not been played yet
         try:
-            button = match_row.find_element(By.CLASS_NAME, "ligameplBtnLigameplgameExist")
+            button = match_row.find_element(
+                By.CLASS_NAME, "ligameplBtnLigameplgameExist"
+            )
             button.click()
-        except:
+        except Exception:
             print("Skipping match, no button", match_row.get_attribute("outerHTML"))
-            return 
+            return
 
         matches = []
 
-        table = self.browser.find_element(By.ID, "ligameplgame").find_element(By.TAG_NAME, "table")
+        table = self.browser.find_element(By.ID, "ligameplgame").find_element(
+            By.TAG_NAME, "table"
+        )
         match_rows = table.find_elements(By.CLASS_NAME, "resultTable")
         for i, m in enumerate(match_rows):
             match_info = m.find_elements(By.TAG_NAME, "td")
@@ -127,7 +142,7 @@ class Crawler():
     def _close_match_overlay(self):
         dialogue = self.browser.find_element(By.ID, "showligadashDialog")
         button = dialogue.find_element(By.TAG_NAME, "button")
-        wait = WebDriverWait(self.browser, timeout=15).until(element_to_be_clickable(button))
+        WebDriverWait(self.browser, timeout=15).until(element_to_be_clickable(button))
         time.sleep(1)
         # self.browser.execute_script("arguments[0].click();", button)
         button.click()
@@ -152,9 +167,9 @@ class Crawler():
         comps = [a.get_attribute("title") for a in comp_elements]
         return comps
 
-    def get_clubs_and_teams(self, associations : list = None, competitions : list = None):
-        teams = defaultdict(set) # holds club : {A, B, C, D, E}
-        players = [] # {(assoc id, name, club)}
+    def get_clubs_and_teams(self, associations: list = None, competitions: list = None):
+        teams = defaultdict(set)  # holds club : {A, B, C, D, E}
+        players = []  # {(assoc id, name, club)}
 
         if associations is None:
             associations = self.get_associations()
@@ -164,7 +179,7 @@ class Crawler():
             self._choose_association(assoc)
             if competitions is None:
                 competitions = self.get_competitions(assoc)
-            
+
             for comp in competitions:
                 time.sleep(1)
                 self._choose_competition(comp)
@@ -173,14 +188,18 @@ class Crawler():
                 time.sleep(1)
                 self._choose_association(assoc)
                 time.sleep(1)
-        
-                squad_panel = self.browser.find_element(By.ID, "showPlayerSquadAreaData")
-                team_headings = squad_panel.find_elements(By.CLASS_NAME, "panel-heading") #previous "collapsed"
+
+                squad_panel = self.browser.find_element(
+                    By.ID, "showPlayerSquadAreaData"
+                )
+                team_headings = squad_panel.find_elements(
+                    By.CLASS_NAME, "panel-heading"
+                )  # previous "collapsed"
 
                 for team_heading in team_headings:
 
                     team_id = team_heading.get_attribute("id").replace("teamTopic", "")
-                
+
                     club_team_name = team_heading.get_attribute("textContent").strip()
                     club, team = club_team_name[:-2], club_team_name[-1]
                     club = club.strip()
@@ -188,7 +207,9 @@ class Crawler():
                     teams[club].add(team)
                     team_data = squad_panel.find_element(By.ID, f"teamData{team_id}")
 
-                    player_spans = team_data.find_elements(By.CLASS_NAME, "form-control-static")
+                    player_spans = team_data.find_elements(
+                        By.CLASS_NAME, "form-control-static"
+                    )
                     player_info = [p.get_attribute("textContent") for p in player_spans]
                     for p in player_info:
                         player = p.replace("TC", "").strip().split("(")
@@ -203,12 +224,17 @@ class Crawler():
                         players.append((id, name, club))
         return teams, players
 
-    def get_matches(self, associations : list = None, competitions : list = None, from_date=datetime(2022,8,1)):
+    def get_matches(
+        self,
+        associations: list = None,
+        competitions: list = None,
+        from_date=datetime(2022, 8, 1),
+    ):
         # click on each "Spielbericht" that took place after "from_date"
         # If there is data available, parse into pandas from html table
         # make these fit via match number in table
-        matchdays = [] # hold match dicts 
-        matches = [] # hold list of single/double matches per matchday
+        matchdays = []  # hold match dicts
+        matches = []  # hold list of single/double matches per matchday
 
         if associations is None:
             associations = self.get_associations()
@@ -217,7 +243,7 @@ class Crawler():
             self._choose_association(assoc)
             if competitions is None:
                 competitions = self.get_competitions(assoc)
-            
+
             for comp in competitions:
                 time.sleep(1)
                 self._choose_competition(comp)
@@ -233,29 +259,39 @@ class Crawler():
                     for match_row in match_rows:
                         if len(match_row.get_attribute("id")):
                             continue
-                    
+
                         matchday_info = {}
                         match_info = match_row.find_elements(By.TAG_NAME, "td")
                         date = match_info[0].get_attribute("textContent")
-                        if not "." in date:
+                        if "." not in date:
                             continue
                         _, date, time_ = date.split(" ")
                         d, m, y = date.split(".")
                         h, min = time_.split(":")
-                        match_date = datetime(int(y)+2000, int(m), int(d), int(h), int(min))
+                        match_date = datetime(
+                            int(y) + 2000, int(m), int(d), int(h), int(min)
+                        )
 
                         if match_date < from_date:
                             print("skip", match_date, from_date)
                             continue
-                        
+
                         matchday_info["date"] = match_date
-                        matchday_info["home_team"] = match_info[1].get_attribute("textContent").strip()
-                        matchday_info["away_team"] = match_info[2].get_attribute("textContent").strip()
-                        matchday_info["result"] = match_info[3].get_attribute("textContent").strip()
-                        matchday_info["legs"] = match_info[4].get_attribute("textContent").strip()
+                        matchday_info["home_team"] = (
+                            match_info[1].get_attribute("textContent").strip()
+                        )
+                        matchday_info["away_team"] = (
+                            match_info[2].get_attribute("textContent").strip()
+                        )
+                        matchday_info["result"] = (
+                            match_info[3].get_attribute("textContent").strip()
+                        )
+                        matchday_info["legs"] = (
+                            match_info[4].get_attribute("textContent").strip()
+                        )
                         matchday_info["competition"] = comp
                         matchday_info["association"] = assoc
-                        
+
                         if not matchday_info["result"].strip() == "-:-":
                             results = self._get_results_from_overlay(match_info[-1])
 
@@ -266,14 +302,29 @@ class Crawler():
 
 if "__main__" == __name__:
     import argparse
-    parser = argparse.ArgumentParser(
-        description='Crawl data from 2k app.'
-    )
 
-    parser.add_argument('--date', help="Matches before this date are ignored. Expects YYYY-MM-DD.", required=False)
-    parser.add_argument("--path", help="Destination for the crawled data.", required=True)
-    parser.add_argument('--season', help="What season we crawl. Expects YYYY (will be set to first of august that year.)", required=True, type=int)
-    parser.add_argument("--associations", help="Limit associations to be crawled.", nargs="*", default=["DBH", "NDV"])
+    parser = argparse.ArgumentParser(description="Crawl data from 2k app.")
+
+    parser.add_argument(
+        "--date",
+        help="Matches before this date are ignored. Expects YYYY-MM-DD.",
+        required=False,
+    )
+    parser.add_argument(
+        "--path", help="Destination for the crawled data.", required=True
+    )
+    parser.add_argument(
+        "--season",
+        help="What season we crawl. Expects YYYY (will be set to first of august that year.)",
+        required=True,
+        type=int,
+    )
+    parser.add_argument(
+        "--associations",
+        help="Limit associations to be crawled.",
+        nargs="*",
+        default=["DBH", "NDV"],
+    )
     args = parser.parse_args()
 
     data_path = Path(args.path)
@@ -290,7 +341,7 @@ if "__main__" == __name__:
     results["crawled_date"] = datetime.now().isoformat()
     results["season"] = season.isoformat()
     results["crawled_competitions"] = {}
-    with Crawler(args.season) as crawler:
+    with Crawler2K(args.season) as crawler:
         if args.associations[0] == "all":
             assocs = crawler.get_associations()
         else:
@@ -303,8 +354,12 @@ if "__main__" == __name__:
                 results["crawled_competitions"][a].append(comp)
                 results[a][comp] = {}
                 clubs_teams, players = crawler.get_clubs_and_teams([a], [comp])
-                matchdays, matches = crawler.get_matches([a], [comp], from_date=from_date)
-                results[a][comp]["clubs_teams"] = {club : list(teams) for club, teams in clubs_teams.items()}
+                matchdays, matches = crawler.get_matches(
+                    [a], [comp], from_date=from_date
+                )
+                results[a][comp]["clubs_teams"] = {
+                    club: list(teams) for club, teams in clubs_teams.items()
+                }
                 results[a][comp]["matches"] = matches
                 results[a][comp]["players"] = players
                 for match in matchdays:
@@ -313,7 +368,3 @@ if "__main__" == __name__:
 
     with open(data_path, "w+") as f:
         json.dump(results, f)
-    
-
-    
-

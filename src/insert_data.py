@@ -28,22 +28,19 @@ def get_player_or_create_player_and_human(
         club_id (int): The id for the club. For doubles, more than one can be given. The first one is used for creation.
         association_id (Union[str,None], optional): The player number within the association. Defaults to None.
     """
-    if not isinstance(club_id, (list, tuple)):
-        club_id = (club_id,)
     stmt = (
         select(schema.Player)
         .join(schema.Human, schema.Human.id == schema.Player.human)
         .where(
             and_(
                 (schema.Player.human.name == name),
-                (schema.Player.club.in_(club_id)),
+                (schema.Player.club == club_id),
             )
         )
     )
     player_obj = session.execute(stmt).first()
 
     if player_obj is None:
-        club_id = club_id[0]
         if association_id is not None and "Spieler ist nicht" in association_id:
             logging.info(f"Skip Player {name=} with association_id {association_id=}")
             return
@@ -114,7 +111,9 @@ def populate_players(engine: Engine, players: list):
                         f"Club not found {club_name}. Please create clubs before players."
                     )
 
-                get_player_or_create_player_and_human(session, name, club_obj[0].id, association_id=assoc_id)
+                get_player_or_create_player_and_human(
+                    session, name, club_obj[0].id, association_id=assoc_id
+                )
             except:
                 session.rollback()
                 raise
@@ -280,14 +279,14 @@ def populate_matches(
                     session=session,
                     name=home_player,
                     club_id=home_team.club,
-                    flush_after_add=True
+                    flush_after_add=True,
                 )
 
                 away_obj = get_player_or_create_player_and_human(
                     session=session,
                     name=away_player,
                     club_id=away_team.club,
-                    flush_after_add=True
+                    flush_after_add=True,
                 )
 
                 match_obj = schema.SinglesMatch(
@@ -337,37 +336,33 @@ def populate_matches(
             )
             doubles_obj = session.execute(doubles_stmt).first()
             if not doubles_obj:
-                # BEWARE: May be possible in doubles that players help out in the opponents team!!
-                # Either we have name collision or we have phantom players
-                # Idea: Minimize collision by allowing players only to be in home or away team
-                # Pass list of club ids and query in [home away]
-                # If not exists, create player as home player
+
                 home1_obj = get_player_or_create_player_and_human(
                     session=session,
                     name=home_player1.strip(),
-                    club_id=(home_team.club, away_team.club),
-                    flush_after_add=True
+                    club_id=home_team.club,
+                    flush_after_add=True,
                 )
 
                 home2_obj = get_player_or_create_player_and_human(
                     session=session,
                     name=home_player2.strip(),
-                    club_id=(home_team.club, away_team.club),
-                    flush_after_add=True
+                    club_id=home_team.club,
+                    flush_after_add=True,
                 )
 
                 away1_obj = get_player_or_create_player_and_human(
                     session=session,
                     name=away_player1.strip(),
-                    club_id=(home_team.club, away_team.club),
-                    flush_after_add=True
+                    club_id=away_team.club,
+                    flush_after_add=True,
                 )
 
                 away2_obj = get_player_or_create_player_and_human(
                     session=session,
                     name=away_player2.strip(),
-                    club_id=(home_team.club, away_team.club),
-                    flush_after_add=True
+                    club_id=away_team.club,
+                    flush_after_add=True,
                 )
 
                 match_obj = schema.DoublesMatch(
@@ -477,7 +472,7 @@ def populate_teammatches(
 
 
 if __name__ == "__main__":
-    logging.basicConfig(encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(encoding="utf-8", level=logging.INFO)
     import argparse
 
     parser = argparse.ArgumentParser(description="Populate the database.")
