@@ -31,12 +31,7 @@ def get_player_or_create_player_and_human(
     stmt = (
         select(schema.Player)
         .join(schema.Human, schema.Human.id == schema.Player.human)
-        .where(
-            and_(
-                (schema.Player.human.name == name),
-                (schema.Player.club == club_id),
-            )
-        )
+        .where(and_(schema.Human.name == name, schema.Player.club == club_id))
     )
     player_obj = session.execute(stmt).first()
 
