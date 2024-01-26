@@ -16,6 +16,8 @@ class Human(Base):
     name = Column(String)
     # other stuff may follow
     # global rating?
+    def __repr__(self) -> str:
+        return f"Human {self.id=} {self.name=}"
 
 class Player(Base):
 
@@ -27,7 +29,7 @@ class Player(Base):
     association_id = Column(String)
 
     def __repr__(self) -> str:
-        return f"Player {self.club=} {self.name=}, {self.association_id=}"
+        return f"Player {self.club=} {self.human=}, {self.association_id=}"
     
 class Competition(Base):
 

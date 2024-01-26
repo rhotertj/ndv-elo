@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -8,9 +9,70 @@ from sqlalchemy.orm import Session, aliased
 
 import schema
 
-# TODO: We need to get the name from the HUMAN now and match humans with player identities,
-# find all 7 times where we query players and match the name, join humans first
-# ALSO, make some atomic functions like get or create and comment functions and querys :)
+
+def create_human_id(name):
+    return name.replace(" ", "").lower()[:8] + uuid.uuid4().hex[:8]
+
+
+def get_player_or_create_player_and_human(
+    session, name, club_id, association_id=None, flush_after_add=False
+):
+    """Get a player by club_id and his name. Name will be matched by human object.
+    If a player exists without given association id, it is updated.
+    If a player does not exists, he and an accompanying human object are created.
+
+    NOTE: Session commits and rollbacks need to be done outside this function!
+    Args:
+        session (Session): The current db session.
+        name (str): Player name
+        club_id (int): The id for the club. For doubles, more than one can be given. The first one is used for creation.
+        association_id (Union[str,None], optional): The player number within the association. Defaults to None.
+    """
+    if not isinstance(club_id, (list, tuple)):
+        club_id = (club_id,)
+    stmt = (
+        select(schema.Player)
+        .join(schema.Human, schema.Human.id == schema.Player.human)
+        .where(
+            and_(
+                (schema.Player.human.name == name),
+                (schema.Player.club.in_(club_id)),
+            )
+        )
+    )
+    player_obj = session.execute(stmt).first()
+
+    if player_obj is None:
+        club_id = club_id[0]
+        if association_id is not None and "Spieler ist nicht" in association_id:
+            logging.info(f"Skip Player {name=} with association_id {association_id=}")
+            return
+        human_uid = create_human_id(name)
+        human_obj = schema.Human(id=human_uid, name=name)
+        if association_id is None:
+            association_id = ""
+        player_obj = schema.Player(
+            human=human_uid,
+            association_id=str(association_id),
+            club=club_id,
+        )
+        session.add(human_obj)
+        session.add(player_obj)
+        if flush_after_add:
+            session.flush()
+            session.refresh(player_obj)
+    else:
+        player_obj = player_obj[0]
+
+    if player_obj.association_id == "" and association_id is not None:
+        update_stmt = (
+            update(schema.Player)
+            .where(schema.Player.id == player_obj.id)
+            .values(association_id=str(association_id))
+        )
+        session.execute(update_stmt)
+    return player_obj
+
 
 def reorder_name(player: str):
     """Reorder lastname, name(s) format into name(s) surname.
@@ -43,7 +105,8 @@ def populate_players(engine: Engine, players: list):
         for assoc_id, name, club_name in players:
             name = name.strip()
             try:
-                # check if player exists by assoc_id
+                # Find club first to search player after name within club
+                # Assumption: No name collisions within clubs
                 club_stmt = select(schema.Club).where(schema.Club.name == club_name)
                 club_obj = session.execute(club_stmt).first()
                 if not club_obj:
@@ -51,38 +114,7 @@ def populate_players(engine: Engine, players: list):
                         f"Club not found {club_name}. Please create clubs before players."
                     )
 
-                player_obj = (
-                    session.query(schema.Player)
-                    .where(
-                        (schema.Player.name == name)
-                        & (schema.Player.club == club_obj[0].id)
-                    )
-                    .first()
-                )
-
-                if not player_obj:
-                    # Player not allowed no play
-                    if "Spieler ist nicht" in assoc_id:
-                        continue
-                    # assume unknown player is also not a known human being
-                    human_uid = name.replace(" ", "").lower()[:8] + uuid.uuid4().hex[:8]
-                    human_obj = schema.Human(id=human_uid, name=name)
-                    player_obj = schema.Player(
-                        name=name,
-                        human=human_uid,
-                        association_id=str(assoc_id),
-                        club=club_obj[0].id,
-                    )
-                    session.add(human_obj)
-                    session.add(player_obj)
-                else:
-                    if player_obj.association_id == "":
-                        update_stmt = (
-                            update(schema.Player)
-                            .where(schema.Player.id == player_obj.id)
-                            .values(association_id=str(assoc_id))
-                        )
-                        session.execute(update_stmt)
+                get_player_or_create_player_and_human(session, name, club_obj[0].id, association_id=assoc_id)
             except:
                 session.rollback()
                 raise
@@ -191,7 +223,7 @@ def populate_matches(
                 home_player1, home_player2 = home_player.split("/")
                 away_player1, away_player2 = away_player.split("/")
             except Exception:
-                print("No valid double", home_player, "vs.", away_player)
+                logging.info(f"No valid double: {home_player} vs {away_player}")
                 continue
 
             home_player1 = reorder_name(home_player1)
@@ -216,77 +248,52 @@ def populate_matches(
             away_player = reorder_name(away_player)
 
             home_table = aliased(schema.Player)
+            home_human_table = aliased(schema.Human)
+
             away_table = aliased(schema.Player)
+            away_human_table = aliased(schema.Human)
 
             singles_stmt = (
                 select(schema.SinglesMatch)
                 .join(home_table, home_table.id == schema.SinglesMatch.home_player)
+                .join(home_human_table, home_table.human == home_human_table.id)
                 .join(away_table, away_table.id == schema.SinglesMatch.away_player)
+                .join(away_human_table, away_table.human == away_human_table.id)
                 .where(
                     and_(
-                        away_table.name == away_player,
-                        home_table.name == home_player,
+                        away_table.human.name == away_player,
+                        home_table.human.name == home_player,
                         schema.SinglesMatch.team_match == teammatch_obj.id,
                     )
                 )
             )
             singles_obj = session.execute(singles_stmt).first()
 
+            # This match is not in DB yet, check whether all players are valid and in DB
             if not singles_obj:
-                # Beware name KEIN EINTRAG
+
                 if "KEIN EINTRAG" in (home_player, away_player):
-                    print("Skip", home_player, away_player)
+                    logging.info(f"Skip match {home_player} vs {away_player}")
                     continue
 
-                home_stmt = select(schema.Player).where(
-                    (schema.Player.name == home_player)
-                    & (schema.Player.club == home_team.club)
+                home_obj = get_player_or_create_player_and_human(
+                    session=session,
+                    name=home_player,
+                    club_id=home_team.club,
+                    flush_after_add=True
                 )
-                home_obj = session.execute(home_stmt).first()
 
-                away_stmt = select(schema.Player).where(
-                    (schema.Player.name == away_player)
-                    & (schema.Player.club == away_team.club)
+                away_obj = get_player_or_create_player_and_human(
+                    session=session,
+                    name=away_player,
+                    club_id=away_team.club,
+                    flush_after_add=True
                 )
-                away_obj = session.execute(away_stmt).first()
-
-                if not home_obj:
-                    # TODO: check for human with that name -> there cannot be one since player only exists with human
-                    # create human too
-                    human_home_uid = (
-                        home_player.replace(" ", "").lower()[:8] + uuid.uuid4().hex[:8]
-                    )
-                    human_home_obj = schema.Human(
-                        # create uid, name
-                        id=human_home_uid,
-                        name=home_player,
-                    )
-                    home_obj = schema.Player(
-                        human=human_home_uid, association_id="", club=home_team.club
-                    )
-                    session.add(human_home_obj)
-                    session.add(home_obj)
-                    session.flush()
-                    session.refresh(home_obj)
-                    home_obj = [home_obj]
-                if not away_obj:
-                    human_away_uid = (
-                        away_player.replace(" ", "").lower()[:8] + uuid.uuid4().hex[:8]
-                    )
-                    human_away_obj = schema.Human(name=away_player, id=human_away_uid)
-                    away_obj = schema.Player(
-                        human=human_away_uid, association_id="", club=away_team.club
-                    )
-                    session.add(human_away_obj)
-                    session.add(away_obj)
-                    session.flush()
-                    session.refresh(away_obj)
-                    away_obj = [away_obj]
 
                 match_obj = schema.SinglesMatch(
                     team_match=teammatch_obj.id,
-                    home_player=home_obj[0].id,
-                    away_player=away_obj[0].id,
+                    home_player=home_obj.id,
+                    away_player=away_obj.id,
                     result=result,
                     match_number=match_number,
                 )
@@ -296,25 +303,33 @@ def populate_matches(
         else:
 
             home1_table = aliased(schema.Player)
+            home1_human_table = aliased(schema.Human)
             away1_table = aliased(schema.Player)
+            away1_human_table = aliased(schema.Human)
             home2_table = aliased(schema.Player)
+            home2_human_table = aliased(schema.Human)
             away2_table = aliased(schema.Player)
+            away2_human_table = aliased(schema.Human)
 
             doubles_stmt = (
                 select(schema.DoublesMatch)
                 .join(home1_table, home1_table.id == schema.DoublesMatch.home_player1)
+                .join(home1_human_table, home1_table.human == home1_human_table.id)
                 .join(away1_table, away1_table.id == schema.DoublesMatch.away_player1)
-                .join(away2_table, away2_table.id == schema.DoublesMatch.away_player2)
+                .join(away1_human_table, away1_table.human == away1_human_table.id)
                 .join(home2_table, home2_table.id == schema.DoublesMatch.home_player2)
-                .where(  # lets hope they dont switch around, i dont want to check all combinations
+                .join(home2_human_table, home2_table.human == home2_human_table.id)
+                .join(away2_table, away2_table.id == schema.DoublesMatch.away_player2)
+                .join(away2_human_table, away2_table.human == away2_human_table.id)
+                .where(
                     and_(
-                        home_player1.strip() == home1_table.name,
+                        home_player1.strip() == home1_table.human.name,
                         home_team.club == home1_table.club,
-                        away_player1.strip() == away1_table.name,
+                        away_player1.strip() == away1_table.human.name,
                         away_team.club == away1_table.club,
-                        home_player2.strip() == home2_table.name,
+                        home_player2.strip() == home2_table.human.name,
                         home_team.club == home2_table.club,
-                        away_player2.strip() == away2_table.name,
+                        away_player2.strip() == away2_table.human.name,
                         away_team.club == away2_table.club,
                         teammatch_obj.id == schema.DoublesMatch.team_match,
                     )
@@ -322,99 +337,45 @@ def populate_matches(
             )
             doubles_obj = session.execute(doubles_stmt).first()
             if not doubles_obj:
-                home1_stmt = select(schema.Player).where(
-                    schema.Player.name == home_player1.strip()
+                # BEWARE: May be possible in doubles that players help out in the opponents team!!
+                # Either we have name collision or we have phantom players
+                # Idea: Minimize collision by allowing players only to be in home or away team
+                # Pass list of club ids and query in [home away]
+                # If not exists, create player as home player
+                home1_obj = get_player_or_create_player_and_human(
+                    session=session,
+                    name=home_player1.strip(),
+                    club_id=(home_team.club, away_team.club),
+                    flush_after_add=True
                 )
-                home1_obj = session.execute(home1_stmt).first()
 
-                away1_stmt = select(schema.Player).where(
-                    schema.Player.name == away_player1.strip()
+                home2_obj = get_player_or_create_player_and_human(
+                    session=session,
+                    name=home_player2.strip(),
+                    club_id=(home_team.club, away_team.club),
+                    flush_after_add=True
                 )
-                away1_obj = session.execute(away1_stmt).first()
 
-                home2_stmt = select(schema.Player).where(
-                    schema.Player.name == home_player2.strip()
+                away1_obj = get_player_or_create_player_and_human(
+                    session=session,
+                    name=away_player1.strip(),
+                    club_id=(home_team.club, away_team.club),
+                    flush_after_add=True
                 )
-                home2_obj = session.execute(home2_stmt).first()
 
-                away2_stmt = select(schema.Player).where(
-                    schema.Player.name == away_player2.strip()
+                away2_obj = get_player_or_create_player_and_human(
+                    session=session,
+                    name=away_player2.strip(),
+                    club_id=(home_team.club, away_team.club),
+                    flush_after_add=True
                 )
-                away2_obj = session.execute(away2_stmt).first()
-
-                if not home1_obj:
-                    human_home1_uid = (
-                        home_player1.replace(" ", "").lower()[:8] + uuid.uuid4().hex[:8]
-                    )
-                    human_home1_obj = schema.Human(
-                        id=human_home1_uid, name=home_player1
-                    )
-                    home1_obj = schema.Player(
-                        name=home_player1, association_id="", club=home_team.club
-                    )
-                    session.add(human_home1_obj)
-                    session.add(home1_obj)
-                    session.flush()
-                    session.refresh(home1_obj)
-                    home1_obj = [home1_obj]
-
-                if not home2_obj:
-                    human_home2_uid = (
-                        home_player2.replace(" ", "").lower()[:8] + uuid.uuid4().hex[:8]
-                    )
-                    human_home2_obj = schema.Human(
-                        id=human_home2_uid, name=home_player2
-                    )
-                    home2_obj = schema.Player(
-                        human=human_home2_obj, association_id="", club=home_team.club
-                    )
-                    session.add(human_home2_obj)
-                    session.add(home2_obj)
-                    session.flush()
-                    session.refresh(home2_obj)
-                    home2_obj = [home2_obj]
-
-                if not away1_obj:
-                    human_away1_uid = (
-                        away_player1.replace(" ", "").lower()[:8] + uuid.uuid4().hex[:8]
-                    )
-                    human_away1_obj = schema.Human(
-                        id=human_away1_uid, name=away_player1
-                    )
-                    away1_obj = schema.Player(
-                        human=human_away1_obj, association_id="", club=away_team.club
-                    )
-                    session.add(human_away1_obj)
-                    session.add(away1_obj)
-                    session.flush()
-                    session.refresh(away1_obj)
-                    away1_obj = [away1_obj]
-
-                if not away2_obj:
-                    human_away2_uid = (
-                        away_player2.replace(" ", "").lower()[:8] + uuid.uuid4().hex[:8]
-                    )
-                    human_away2_obj = schema.Human(
-                        id=human_away2_uid, name=away_player2
-                    )
-                    away2_obj = schema.Player(
-                        human=human_away2_obj, association_id="", club=away_team.club
-                    )
-                    session.add(human_away2_obj)
-                    away2_obj = schema.Player(
-                        name=away_player2, association_id="", club=away_team.club
-                    )
-                    session.add(away2_obj)
-                    session.flush()
-                    session.refresh(away2_obj)
-                    away2_obj = [away2_obj]
 
                 match_obj = schema.DoublesMatch(
                     team_match=teammatch_obj.id,
-                    home_player1=home1_obj[0].id,
-                    away_player1=away1_obj[0].id,
-                    home_player2=home2_obj[0].id,
-                    away_player2=away2_obj[0].id,
+                    home_player1=home1_obj.id,
+                    away_player1=away1_obj.id,
+                    home_player2=home2_obj.id,
+                    away_player2=away2_obj.id,
                     result=result,
                     match_number=match_number,
                 )
@@ -516,7 +477,7 @@ def populate_teammatches(
 
 
 if __name__ == "__main__":
-
+    logging.basicConfig(encoding='utf-8', level=logging.INFO)
     import argparse
 
     parser = argparse.ArgumentParser(description="Populate the database.")
