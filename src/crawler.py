@@ -15,23 +15,28 @@ import json
 from pathlib import Path
 import os
 
-#NDV_URL = "https://ndv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=112&filVbsubKey=1&filStaffKey=667&filStaffFsGrpdataKey=0#"
-NDV_URL = "https://ddv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=126&filVbsubKey=1&filStaffKey=823&filStaffFsGrpdataKey=0"
+data_sources = {
+    2022: "https://ndv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=112&filVbsubKey=1&filStaffKey=667&filStaffFsGrpdataKey=0#",
+    2023: "https://ddv.2k-dart-software.de/index.php/de/component/dartliga/index.php?option=com_dartliga&controller=showligagameplan&layout=showdashboard&filVbKey=6&filCompKey=1&filSaiKey=126&filVbsubKey=1&filStaffKey=823&filStaffFsGrpdataKey=0"
+}
 
 class Crawler():
 
+    def __init__(self, season) -> None:
+        self.url = self.data_sources[season]
+
     def __enter__(self):
         options = Options()
-        # options.add_argument("--headless")
-        self.browser = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=options)
+        # self.browser = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=options)
+        # docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-firefox:4.17.0-20240123
+        self.browser = webdriver.Remote(command_executor="http://localhost:4444", options=options)
         self.browser.implicitly_wait(5)
-        self.browser.get(NDV_URL)
+        self.browser.get(self.url)
         self.browser.execute_script("window.loadWaitTime = 10000 * 1000000;")
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        # self.browser.quit()
-        pass
+        self.browser.quit()
     
     @property
     def page_content(self):
@@ -187,8 +192,7 @@ class Crawler():
                     player_info = [p.get_attribute("textContent") for p in player_spans]
                     for p in player_info:
                         player = p.replace("TC", "").strip().split("(")
-                        # TODO: Fix player ordering! Currently van Hooff, Jens -> Hooff Jens van
-                        # van Hooff, Jens (100405)
+
                         # ["van Hooff, Jens", 100405)]
                         name_split = player[0].split(",")
                         name = f"{' '.join([n.strip() for n in name_split[1:]])} {name_split[0]}".strip()
@@ -286,7 +290,7 @@ if "__main__" == __name__:
     results["crawled_date"] = datetime.now().isoformat()
     results["season"] = season.isoformat()
     results["crawled_competitions"] = {}
-    with Crawler() as crawler:
+    with Crawler(args.season) as crawler:
         if args.associations[0] == "all":
             assocs = crawler.get_associations()
         else:

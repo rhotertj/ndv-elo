@@ -15,5 +15,11 @@ exports.index = (req, res, next) => {
   };
 
 exports.single = (req, res, next) => {
-  res.status(503)
+  const player_id = req.params.player_id
+  // select past matches
+  // select past rankings in all competitions
+  // select past teams / clubs played in 
+  db.prepare()
+  // SELECT * FROM singlesmatch_table AS match JOIN human_table 
+  // WHERE match.home_player = 
 }

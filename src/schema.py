@@ -1,22 +1,28 @@
 import sqlalchemy
 
 from sqlalchemy import ForeignKey
-from sqlalchemy import Integer, Column, String, DateTime, Float, Boolean
+from sqlalchemy import Integer, Column, String, DateTime, Float, Boolean, Text
 
 from sqlalchemy.orm import DeclarativeBase
 
 class Base(DeclarativeBase):
     pass
 
-# Human(uniquetokenid, name)
-# add human_id to player as fk
+class Human(Base):
+
+    __tablename__ = "human_table"
+
+    id = Column(String, unique=True, primary_key=True)
+    name = Column(String)
+    # other stuff may follow
+    # global rating?
 
 class Player(Base):
 
     __tablename__ = "player_table"
 
     id = Column(Integer, unique=True, autoincrement=True, primary_key=True)
-    name = Column(String)
+    human = Column(String, ForeignKey("human_table.id"))
     club = Column(Integer, ForeignKey("club_table.id"), nullable=True)
     association_id = Column(String)
 

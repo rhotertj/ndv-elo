@@ -1,7 +1,7 @@
 var db  = require("../database.js");
 
 exports.index = (req, res, next) => {
-    const competition_name = req.params.competition
+    const competition_name = req.params.competition.replace(/-/g, " ")
     const season = req.params.season
 
     let stmt = db.prepare(
@@ -10,7 +10,7 @@ exports.index = (req, res, next) => {
          JOIN skillrating_table AS s ON s.player = p.id
          JOIN club_table AS cl ON p.club = cl.id
          JOIN competition_table as c ON c.id = s.competition
-         WHERE c.name = (?) AND date(c.year) = date(? || '-08-01')
+         WHERE lower(c.name) = lower(?) AND date(c.year) = date(? || '-08-01')
          ORDER BY s.rating_mu DESC;
          `);
     stmt.all(

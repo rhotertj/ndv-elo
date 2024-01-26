@@ -2,7 +2,7 @@ from sqlalchemy import select, insert, update, create_engine, Date, Engine
 from sqlalchemy.orm import Session, aliased
 from pathlib import Path
 import trueskill
-import data
+import schema
 import pickle as pkl
 from tqdm import tqdm
 from datetime import datetime
@@ -15,11 +15,11 @@ def reset_ratings(engine : Engine):
         engine (Engine): Engine connected to the database.
     """    
     with Session(engine) as session:
-        stmt = update(data.SkillRating).values(rating_mu=25, rating_sigma=8.3333)
+        stmt = update(schema.SkillRating).values(rating_mu=25, rating_sigma=8.3333)
         session.execute(stmt)
         session.commit()
 
-def compute_ratings(engine : Engine, competition : data.Competition):
+def compute_ratings(engine : Engine, competition : schema.Competition):
     """Compute ratings for a competition by iterating through all its matches.
     Currently only takes singles into account.
 
@@ -29,27 +29,27 @@ def compute_ratings(engine : Engine, competition : data.Competition):
     """    
     # TODO Doubles
     with Session(engine) as session:
-        stmt = select(data.TeamMatch).where(data.TeamMatch.competition == competition.id).order_by(data.TeamMatch.date)
+        stmt = select(schema.TeamMatch).where(schema.TeamMatch.competition == competition.id).order_by(schema.TeamMatch.date)
         team_matches = session.execute(stmt).all()
         for match in team_matches:
             match = match[0]
             if match.used_for_rating:
                 continue
             else:
-                update_stmt = update(data.TeamMatch).where(data.TeamMatch.id == match.id).values(used_for_rating=True)
+                update_stmt = update(schema.TeamMatch).where(schema.TeamMatch.id == match.id).values(used_for_rating=True)
                 session.execute(update_stmt)
 
-            singles_stmt = select(data.SinglesMatch).where(data.SinglesMatch.team_match == match.id)
+            singles_stmt = select(schema.SinglesMatch).where(schema.SinglesMatch.team_match == match.id)
             # doubles_stmt = select(data.DoublesMatch).where(data.DoublesMatch.team_match == match[0].id)
             singles = session.execute(singles_stmt).all()
             # doubles = session.execute(doubles_stmt).all()
             
             for single in singles:
                 
-                home_player_rating_stmt = select(data.SkillRating).where((data.SkillRating.player == single[0].home_player) & (data.SkillRating.competition == competition.id))
+                home_player_rating_stmt = select(schema.SkillRating).where((schema.SkillRating.player == single[0].home_player) & (schema.SkillRating.competition == competition.id))
                 home_player_rating = session.execute(home_player_rating_stmt).first()
                 if not home_player_rating:
-                    home_player_rating = data.SkillRating(
+                    home_player_rating = schema.SkillRating(
                         player=single[0].home_player,
                         competition=competition.id,
                         rating_mu=25,
@@ -62,10 +62,10 @@ def compute_ratings(engine : Engine, competition : data.Competition):
                 else:
                     home_player_rating = home_player_rating[0]
 
-                away_player_rating_stmt = select(data.SkillRating).where((data.SkillRating.player == single[0].away_player) & (data.SkillRating.competition == competition.id))
+                away_player_rating_stmt = select(schema.SkillRating).where((schema.SkillRating.player == single[0].away_player) & (schema.SkillRating.competition == competition.id))
                 away_player_rating = session.execute(away_player_rating_stmt).first()
                 if not away_player_rating:
-                    away_player_rating = data.SkillRating(
+                    away_player_rating = schema.SkillRating(
                         player=single[0].away_player,
                         competition=competition.id,
                         rating_mu=25,
@@ -92,12 +92,12 @@ def compute_ratings(engine : Engine, competition : data.Competition):
                 else:
                     away_ts, home_ts = trueskill.rate_1vs1(away_ts, home_ts)
 
-                update_home_stmt = update(data.SkillRating).where(data.SkillRating.id == home_player_rating.id).values(
+                update_home_stmt = update(schema.SkillRating).where(schema.SkillRating.id == home_player_rating.id).values(
                     rating_mu=home_ts.mu,
                     rating_sigma=home_ts.sigma,
                     latest_update=match.date
                 )
-                update_away_stmt = update(data.SkillRating).where(data.SkillRating.id == away_player_rating.id).values(
+                update_away_stmt = update(schema.SkillRating).where(schema.SkillRating.id == away_player_rating.id).values(
                     rating_mu=away_ts.mu,
                     rating_sigma=away_ts.sigma,
                     latest_update=match.date
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     season = datetime(args.season, 8, 1)
     engine = create_engine(f"sqlite:///{args.database}")
 
-    competitions = get_associations_and_competitions(engine, association="DBH", season=season)
+    competitions = get_associations_and_competitions(engine, season=season)
     for c in competitions:
         c = c[0]
         compute_ratings(engine, c)

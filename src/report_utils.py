@@ -10,7 +10,7 @@ import trueskill
 from scipy.stats import norm
 from sqlalchemy import select, insert, update, create_engine, Date, and_
 from sqlalchemy.orm import Session, aliased
-import data
+import schema
 from common_queries import get_positions_for_player
 
 def win_probability(team1, team2):
