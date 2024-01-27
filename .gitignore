@@ -2,6 +2,7 @@
 rankings/node_modules/
 rankings/package-lock.json
 rankings/public/
+data
 
 
 # Byte-compiled / optimized / DLL files
