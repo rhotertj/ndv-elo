@@ -107,25 +107,26 @@ if "__main__" == __name__:
                 results["crawled_competitions"] = {}
                 jobs.append((args.season, results, a, c, from_date))
 
-    logging.info(f"Starting {len(jobs)} jobs")
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_job = {executor.submit(crawl_competition, *job): job for job in jobs}
-        for future in concurrent.futures.as_completed(future_to_job):
-            job = future_to_job[future]
-            season, _, a, c, from_date = job
-            logging.info(f"Finished job for {a,c}")
-            try:
-                data = future.result()
-                time_str = datetime.fromisoformat(data["crawled_date"]).strftime(
-                    "%Y-%m-%d-T%H+%M+%S"
-                )
-                with open(
-                    data_path / f"{season}" / f"{a}_{c}_{time_str}.json",
-                    "w+",
-                ) as f:
-                    json.dump(data, f)
-            except Exception as e:
-                print(e)
-                logging.error(f"{c} crashed, up for retry")
-                job_id = executor.submit(crawl_competition, *job)
-                future_to_job[job_id] = job
+    while len(jobs) > 0:
+        logging.info(f"Running for {len(jobs)} jobs")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_job = {
+                executor.submit(crawl_competition, *job): job for job in jobs
+            }
+            for future in concurrent.futures.as_completed(future_to_job):
+                job = future_to_job[future]
+                season, _, a, c, from_date = job
+                logging.info(f"Finished job for {a,c}")
+                try:
+                    data = future.result()
+                    time_str = datetime.fromisoformat(data["crawled_date"]).strftime(
+                        "%Y-%m-%d-T%H+%M+%S"
+                    )
+                    with open(
+                        data_path / f"{season}" / f"{a}_{c}_{time_str}.json",
+                        "w+",
+                    ) as f:
+                        json.dump(data, f)
+                    jobs.remove(job)
+                except Exception:
+                    logging.error(f"{c} crashed, up for retry")
