@@ -39,6 +39,9 @@ def get_player_or_create_player_and_human(
         if association_id is not None and "Spieler ist nicht" in association_id:
             logging.info(f"Skip Player {name=} with association_id {association_id=}")
             return
+        if name == "---":
+            logging.info(f"Skip Player {name=} ({club_id=}) with association_id {association_id=}")
+            return
         human_uid = create_human_id(name)
         human_obj = schema.Human(id=human_uid, name=name)
         if association_id is None:
