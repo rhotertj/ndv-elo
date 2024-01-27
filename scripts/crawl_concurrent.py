@@ -91,12 +91,6 @@ if "__main__" == __name__:
         from_date = datetime.fromisoformat(args.date)
     logging.info(f"Only checking matches past {from_date}")
 
-    results = {}
-    results["from_date"] = from_date.isoformat()
-    results["crawled_date"] = datetime.now().isoformat()
-    results["season"] = season.isoformat()
-    results["crawled_competitions"] = {}
-
     jobs = []
     with Crawler2K(args.season) as crawler:
         if args.associations[0] == "all":
@@ -106,7 +100,12 @@ if "__main__" == __name__:
         for a in assocs:
             comps = crawler.get_competitions(a)
             for c in comps:
-                jobs.append((args.season, results.copy(), a, c, from_date))
+                results = {}
+                results["from_date"] = from_date.isoformat()
+                results["crawled_date"] = datetime.now().isoformat()
+                results["season"] = season.isoformat()
+                results["crawled_competitions"] = {}
+                jobs.append((args.season, results, a, c, from_date))
 
     logging.info(f"Starting {len(jobs)} jobs")
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -117,13 +116,16 @@ if "__main__" == __name__:
             logging.info(f"Finished job for {a,c}")
             try:
                 data = future.result()
-                time_str = datetime.strftime(data["crawled_date"], "%Y-%m-%d-T%H+%M+%S")
+                time_str = datetime.fromisoformat(data["crawled_date"]).strftime(
+                    "%Y-%m-%d-T%H+%M+%S"
+                )
                 with open(
                     data_path / f"{season}" / f"{a}_{c}_{time_str}.json",
                     "w+",
                 ) as f:
                     json.dump(data, f)
-            except Exception:
+            except Exception as e:
+                print(e)
                 logging.error(f"{c} crashed, up for retry")
                 job_id = executor.submit(crawl_competition, *job)
                 future_to_job[job_id] = job
