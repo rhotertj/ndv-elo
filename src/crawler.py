@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 from collections import defaultdict
 from datetime import datetime
@@ -24,11 +25,12 @@ data_sources = {
 class Crawler2K:
 
     def __init__(self, season) -> None:
-        self.url = self.data_sources[season]
+        self.url = data_sources[season]
 
     def __enter__(self):
         options = Options()
         # self.browser = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=options)
+        # TODO MAX CONCURRENCY
         # docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-firefox:4.17.0-20240123
         self.browser = webdriver.Remote(
             command_executor="http://localhost:4444", options=options
@@ -110,7 +112,9 @@ class Crawler2K:
             )
             button.click()
         except Exception:
-            print("Skipping match, no button", match_row.get_attribute("outerHTML"))
+            logging.debug(
+                "Skipping match, no button", match_row.get_attribute("outerHTML")
+            )
             return
 
         matches = []
@@ -203,7 +207,7 @@ class Crawler2K:
                     club_team_name = team_heading.get_attribute("textContent").strip()
                     club, team = club_team_name[:-2], club_team_name[-1]
                     club = club.strip()
-                    print(f"|{club}|")
+                    logging.debug(f"Crawled club: {club}")
                     teams[club].add(team)
                     team_data = squad_panel.find_element(By.ID, f"teamData{team_id}")
 
@@ -220,7 +224,7 @@ class Crawler2K:
                         if "Spieler ist nicht" in name:
                             continue
                         id = player[-1][:-1]
-                        print(name)
+                        logging.debug(f"Crawled player: {name, id}")
                         players.append((id, name, club))
         return teams, players
 
@@ -273,7 +277,7 @@ class Crawler2K:
                         )
 
                         if match_date < from_date:
-                            print("skip", match_date, from_date)
+                            logging.info(f"skip, {match_date} before {from_date}")
                             continue
 
                         matchday_info["date"] = match_date
@@ -334,13 +338,15 @@ if "__main__" == __name__:
         from_date = season
     else:
         from_date = datetime.fromisoformat(args.date)
-    print("Only checking matches past", from_date)
+    logging.info(f"Only checking matches past {from_date}")
 
     results = {}
     results["from_date"] = from_date.isoformat()
     results["crawled_date"] = datetime.now().isoformat()
     results["season"] = season.isoformat()
     results["crawled_competitions"] = {}
+    # Crawl
+
     with Crawler2K(args.season) as crawler:
         if args.associations[0] == "all":
             assocs = crawler.get_associations()

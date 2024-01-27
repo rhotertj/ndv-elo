@@ -1,12 +1,11 @@
 import sqlalchemy
-
-from sqlalchemy import ForeignKey
-from sqlalchemy import Integer, Column, String, DateTime, Float, Boolean, Text
-
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase
+
 
 class Base(DeclarativeBase):
     pass
+
 
 class Human(Base):
 
@@ -14,10 +13,12 @@ class Human(Base):
 
     id = Column(String, unique=True, primary_key=True)
     name = Column(String)
+
     # other stuff may follow
     # global rating?
     def __repr__(self) -> str:
         return f"Human {self.id=} {self.name=}"
+
 
 class Player(Base):
 
@@ -30,7 +31,8 @@ class Player(Base):
 
     def __repr__(self) -> str:
         return f"Player {self.club=} {self.human=}, {self.association_id=}"
-    
+
+
 class Competition(Base):
 
     __tablename__ = "competition_table"
@@ -42,6 +44,7 @@ class Competition(Base):
 
     def __repr__(self) -> str:
         return f"Competition {self.id=} {self.name=} {self.association=} {self.year=}"
+
 
 class Club(Base):
 
@@ -66,6 +69,7 @@ class Team(Base):
     def __repr__(self) -> str:
         return f"Team {self.id=} {self.rank=} {self.club=} {self.year=}"
 
+
 class TeamMatch(Base):
 
     __tablename__ = "teammatch_table"
@@ -81,6 +85,7 @@ class TeamMatch(Base):
     def __repr__(self) -> str:
         return f"teammatch {self.id=} {self.date=} {self.competition=} {self.result=} {self.home_team=} {self.away_team=}"
 
+
 class SinglesMatch(Base):
 
     __tablename__ = "singlesmatch_table"
@@ -89,11 +94,12 @@ class SinglesMatch(Base):
     team_match = Column(Integer, ForeignKey("teammatch_table.id"), nullable=True)
     home_player = Column(Integer, ForeignKey("player_table.id"))
     away_player = Column(Integer, ForeignKey("player_table.id"))
-    result = Column(String) # this could be expanded to home legs, away legs, sets ...
+    result = Column(String)  # this could be expanded to home legs, away legs, sets ...
     match_number = Column(Integer)
 
     def __repr__(self) -> str:
         return f"SinglesMatch {self.id=} {self.team_match=} {self.home_player=} {self.away_player=} {self.result=}"
+
 
 class DoublesMatch(Base):
 
@@ -105,9 +111,10 @@ class DoublesMatch(Base):
     home_player2 = Column(Integer, ForeignKey("player_table.id"))
     away_player1 = Column(Integer, ForeignKey("player_table.id"))
     away_player2 = Column(Integer, ForeignKey("player_table.id"))
-    result = Column(String) # this could be expanded to home legs, away legs, sets ...
+    result = Column(String)  # this could be expanded to home legs, away legs, sets ...
     match_number = Column(Integer)
-    
+
+
 class SkillRating(Base):
 
     __tablename__ = "skillrating_table"
@@ -122,13 +129,13 @@ class SkillRating(Base):
     def __repr__(self) -> str:
         return f"SkillRating {self.id=} {self.player=} {self.competition=} {self.rating_mu=} {self.rating_sigma=}"
 
+
 if "__main__" == __name__:
     import argparse
-    parser = argparse.ArgumentParser(
-        description='Create a new database'
-    )
 
-    parser.add_argument('--filename')
+    parser = argparse.ArgumentParser(description="Create a new database")
+
+    parser.add_argument("--filename")
     args = parser.parse_args()
 
     fn = args.filename
