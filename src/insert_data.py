@@ -479,33 +479,36 @@ if __name__ == "__main__":
         "--data",
         help="Path to the data to be inserted. Expecting a json file",
         required=True,
+        nargs="+",
     )
     args = parser.parse_args()
 
-    data_path = Path(args.data)
     engine = create_engine(f"sqlite:///{args.database}")
 
-    with open(data_path, "r") as f:
-        crawled_results = json.load(f)
-    crawled_results["season"] = datetime.fromisoformat(crawled_results["season"])
+    for data_path in args.data:
+        data_path = Path(data_path)
 
-    populate_competitions(
-        engine,
-        crawled_results["crawled_competitions"],
-        season=crawled_results["season"],
-    )
+        with open(data_path, "r") as f:
+            crawled_results = json.load(f)
+        crawled_results["season"] = datetime.fromisoformat(crawled_results["season"])
 
-    for a, competitions in crawled_results["crawled_competitions"].items():
-        for c in competitions:
-            populate_clubs_and_teams(
-                engine,
-                crawled_results[a][c]["clubs_teams"],
-                season=crawled_results["season"],
-            )
-            populate_players(engine, crawled_results[a][c]["players"])
-            populate_teammatches(
-                engine,
-                crawled_results[a][c]["team_matches"],
-                crawled_results[a][c]["matches"],
-                season=crawled_results["season"],
-            )
+        populate_competitions(
+            engine,
+            crawled_results["crawled_competitions"],
+            season=crawled_results["season"],
+        )
+
+        for a, competitions in crawled_results["crawled_competitions"].items():
+            for c in competitions:
+                populate_clubs_and_teams(
+                    engine,
+                    crawled_results[a][c]["clubs_teams"],
+                    season=crawled_results["season"],
+                )
+                populate_players(engine, crawled_results[a][c]["players"])
+                populate_teammatches(
+                    engine,
+                    crawled_results[a][c]["team_matches"],
+                    crawled_results[a][c]["matches"],
+                    season=crawled_results["season"],
+                )
