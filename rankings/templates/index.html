@@ -1,0 +1,50 @@
+<!doctype html>
+<head>
+<title>Dart Rankings</title>
+<link rel="stylesheet" href="static/style.css">
+<script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+<script src="static/script.js"></script>
+</head>
+
+<body>
+    <div class="top-wrapper">
+        <div class="main-heading">
+            <h1>Dart Rankings</h1>
+        </div>
+
+        <div class="search-wrapper">
+            <div class="search-input">
+                <input class="sbar block form-control" list="search-autocomplete" type="search" name="search" id="query-input" placeholder="Liga, Team oder Spieler...">
+                <div class="suggestion-box">
+                    <!-- insert listed items here -->
+                    <!-- add PK/ID and Type to every element for select query, keep it hidden -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="content-wrapper">
+        <div class="error" id="error-div"></div>
+        <div class="loader" id="loader"></div>
+        <div class="result-wrapper" id="results">
+            <div class="result-container">
+                <h1>Kreisliga 5 (2023/24)</h1>
+                <div class="result-data"></div>
+            </div>
+            <div class="result-container">
+                <h1>Bezirksliga 2 (2022/23)</h1>
+                <div class="result-data">
+                    <table>
+                        <tr><td>Jim 2537</td></tr>
+                        <tr><td>Jim Thotert (19394949) 2537</td></tr>
+                        <tr><td>Jim 2537</td></tr>
+                        <tr><td>Jim 2537</td></t>
+                    </table>
+                </div>
+            </div>
+    </div>
+    </div>
+
+    <!-- <footer>Hello ;)</footer> -->
+</body>
