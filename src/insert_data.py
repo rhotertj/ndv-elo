@@ -15,7 +15,12 @@ def create_human_id(name):
 
 
 def get_player_or_create_player_and_human(
-    session, name, club_id, association_id=None, flush_after_add=False
+    session: Session,
+    name: str,
+    club_id: int,
+    default_competition: int = None,
+    association_id=None,
+    flush_after_add=False,
 ):
     """Get a player by club_id and his name. Name will be matched by human object.
     If a player exists without given association id, it is updated.
@@ -40,7 +45,9 @@ def get_player_or_create_player_and_human(
             logging.info(f"Skip Player {name=} with association_id {association_id=}")
             return
         if name == "---":
-            logging.info(f"Skip Player {name=} ({club_id=}) with association_id {association_id=}")
+            logging.info(
+                f"Skip Player {name=} ({club_id=}) with association_id {association_id=}"
+            )
             return
         human_uid = create_human_id(name)
         human_obj = schema.Human(id=human_uid, name=name)
@@ -50,6 +57,7 @@ def get_player_or_create_player_and_human(
             human=human_uid,
             association_id=str(association_id),
             club=club_id,
+            default_competition=default_competition,
         )
         session.add(human_obj)
         session.add(player_obj)
@@ -68,8 +76,8 @@ def get_player_or_create_player_and_human(
         session.execute(update_stmt)
     return player_obj
 
-# def get_or_create_singles(teammatch: schema.TeamMatch, home_player_name: str, away_player_name: str, result: str):
 
+# def get_or_create_singles(teammatch: schema.TeamMatch, home_player_name: str, away_player_name: str, result: str):
 
 
 def reorder_name(player: str):
@@ -88,7 +96,9 @@ def reorder_name(player: str):
     return f"{' '.join([n.strip() for n in name_split[1:]])} {name_split[0]}".strip()
 
 
-def populate_players(engine: Engine, players: list):
+def populate_players(
+    engine: Engine, players: list, association: str, competition: str, season: datetime
+):
     """Populate the database with players.
 
     Args:
@@ -100,6 +110,18 @@ def populate_players(engine: Engine, players: list):
     """
     with Session(engine) as session:
         session.begin()
+        comp_stmt = select(schema.Competition).where(
+            and_(
+                schema.Competition.association == association,
+                schema.Competition.name == competition,
+                schema.Competition.year == season.isoformat(),
+            )
+        )
+        comp_obj = session.execute(comp_stmt).first()
+        if not comp_obj:
+            raise ValueError(
+                f"Could not find default competition {association} {competition} for players!"
+            )
         for assoc_id, name, club_name in players:
             name = name.strip()
             try:
@@ -113,7 +135,11 @@ def populate_players(engine: Engine, players: list):
                     )
 
                 get_player_or_create_player_and_human(
-                    session, name, club_obj[0].id, association_id=assoc_id
+                    session,
+                    name,
+                    club_obj[0].id,
+                    default_competition=comp_obj[0].id,
+                    association_id=assoc_id,
                 )
             except:
                 session.rollback()
@@ -153,7 +179,9 @@ def populate_clubs_and_teams(engine: Engine, clubs_and_teams: dict, season: date
                         .first()
                     )
                     if not team_obj:
-                        team_obj = schema.Team(rank=team, club=club_obj.id, year=season)
+                        team_obj = schema.Team(
+                            rank=team, club=club_obj.id, year=season.isoformat()
+                        )
                         session.add(team_obj)
             except:
                 session.rollback()
@@ -175,6 +203,8 @@ def populate_competitions(
         session.begin()
         for assoc, comps in associations_competitions.items():
             for comp in comps:
+                if assoc in comp:
+                    comp.replace("assoc").strip()
                 try:
                     comp_obj = (
                         session.query(schema.Competition)
@@ -182,14 +212,14 @@ def populate_competitions(
                             and_(
                                 schema.Competition.name == comp,
                                 schema.Competition.association == assoc,
-                                schema.Competition.year == season
+                                schema.Competition.year == season.isoformat(),
                             )
                         )
                         .first()
                     )
                     if not comp_obj:
                         comp_obj = schema.Competition(
-                            name=comp, association=assoc, year=season
+                            name=comp, association=assoc, year=season.isoformat()
                         )
                         session.add(comp_obj)
                         logging.info(f"Added {assoc} {comp}")
@@ -240,7 +270,6 @@ def populate_matches(
         )
         home_team = session.execute(home_team_stmt).first()[0]
         logging.debug(f"Found home team {home_team}")
-
 
         away_team_stmt = select(schema.Team).where(
             teammatch_obj.away_team == schema.Team.id
@@ -299,7 +328,9 @@ def populate_matches(
                 )
 
                 if None in [home_obj, away_obj]:
-                    logging.info(f"Skipping match because we could not get or create on of {[home_obj, away_obj]}")
+                    logging.info(
+                        f"Skipping match because we could not get or create on of {[home_obj, away_obj]}"
+                    )
                     continue
 
                 match_obj = schema.SinglesMatch(
@@ -335,7 +366,7 @@ def populate_matches(
                 .join(away2_human_table, away2_table.human == away2_human_table.id)
                 .where(
                     and_(
-                        home_player1 ==  home1_human_table.name,
+                        home_player1 == home1_human_table.name,
                         home_team.club == home1_table.club,
                         away_player1 == away1_human_table.name,
                         away_team.club == away1_table.club,
@@ -416,7 +447,7 @@ def populate_teammatches(
                     and_(
                         schema.Competition.name == match["competition"],
                         schema.Competition.association == match["association"],
-                        schema.Competition.year == season,
+                        schema.Competition.year == season.isoformat(),
                     )
                 )
                 comp_obj = session.execute(comp_stmt).first()
@@ -460,7 +491,7 @@ def populate_teammatches(
                 # try to look for exact teammatch
                 stmt = select(schema.TeamMatch).where(
                     and_(
-                        schema.TeamMatch.date == date,
+                        schema.TeamMatch.date == date.isoformat(),
                         schema.TeamMatch.home_team == home_obj[0],
                         schema.TeamMatch.away_team == away_obj[0],
                         schema.TeamMatch.competition == comp_obj[0],
@@ -471,7 +502,7 @@ def populate_teammatches(
 
                 if not tm_obj:
                     teammatch_ob = schema.TeamMatch(
-                        date=date,
+                        date=date.isoformat(),
                         competition=comp_obj[0],
                         result=match["result"],
                         home_team=home_obj[0],
@@ -532,7 +563,13 @@ if __name__ == "__main__":
                     crawled_results[a][c]["clubs_teams"],
                     season=crawled_results["season"],
                 )
-                # populate_players(engine, crawled_results[a][c]["players"])
+                populate_players(
+                    engine,
+                    crawled_results[a][c]["players"],
+                    a,
+                    c,
+                    season=crawled_results["season"],
+                )
                 populate_teammatches(
                     engine,
                     crawled_results[a][c]["team_matches"],

@@ -63,27 +63,6 @@ def test_duplicate_insert_clubs(db_engine):
     assert n_clubs_1 == n_clubs_2
 
 
-def test_duplicate_insert_players(db_engine):
-    with Session(db_engine) as session:
-        stmt = select(func.count()).select_from(schema.Player)
-        result = session.execute(stmt)
-        n_players_0 = result.scalar()
-    # trunk-ignore(bandit/B101)
-    assert n_players_0 == 0
-    populate_players(db_engine, TEST_DATA["DBH"]["Kreisliga 5"]["players"])
-    with Session(db_engine) as session:
-        stmt = select(func.count()).select_from(schema.Player)
-        result = session.execute(stmt)
-        n_players_1 = result.scalar()
-    # trunk-ignore(bandit/B101)
-    assert n_players_1 == len(TEST_DATA["DBH"]["Kreisliga 5"]["players"])
-    populate_players(db_engine, TEST_DATA["DBH"]["Kreisliga 5"]["players"])
-    with Session(db_engine) as session:
-        stmt = select(func.count()).select_from(schema.Player)
-        result = session.execute(stmt)
-        n_players_2 = result.scalar()
-    # trunk-ignore(bandit/B101)
-    assert n_players_1 == n_players_2
 
 
 def test_duplicate_insert_competitions(db_engine):
@@ -112,6 +91,39 @@ def test_duplicate_insert_competitions(db_engine):
     # trunk-ignore(bandit/B101)
     assert n_comps_1 == n_comps_2
 
+def test_duplicate_insert_players(db_engine):
+    with Session(db_engine) as session:
+        stmt = select(func.count()).select_from(schema.Player)
+        result = session.execute(stmt)
+        n_players_0 = result.scalar()
+    # trunk-ignore(bandit/B101)
+    assert n_players_0 == 0
+    populate_players(
+        db_engine,
+        TEST_DATA["DBH"]["Kreisliga 5"]["players"],
+        association="DBH",
+        competition="Kreisliga 5",
+        season=TEST_DATA["season"],
+    )
+    with Session(db_engine) as session:
+        stmt = select(func.count()).select_from(schema.Player)
+        result = session.execute(stmt)
+        n_players_1 = result.scalar()
+    # trunk-ignore(bandit/B101)
+    assert n_players_1 == len(TEST_DATA["DBH"]["Kreisliga 5"]["players"])
+    populate_players(
+        db_engine,
+        TEST_DATA["DBH"]["Kreisliga 5"]["players"],
+        association="DBH",
+        competition="Kreisliga 5",
+        season=TEST_DATA["season"],
+    )
+    with Session(db_engine) as session:
+        stmt = select(func.count()).select_from(schema.Player)
+        result = session.execute(stmt)
+        n_players_2 = result.scalar()
+    # trunk-ignore(bandit/B101)
+    assert n_players_1 == n_players_2
 
 def test_duplicate_insert_teammatches(db_engine):
     with Session(db_engine) as session:
@@ -155,7 +167,9 @@ def test_duplicate_insert_teammatches(db_engine):
 
     n_matches = sum([len(m) for m in TEST_DATA["DBH"]["Kreisliga 5"]["matches"]])
     # trunk-ignore(bandit/B101)
-    assert n_double_1 + n_single_1  == n_matches - 1 # corrupted data has one duplicate match
+    assert (
+        n_double_1 + n_single_1 == n_matches - 1
+    )  # corrupted data has one duplicate match
     populate_teammatches(
         db_engine,
         TEST_DATA["DBH"]["Kreisliga 5"]["team_matches"],

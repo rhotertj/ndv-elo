@@ -1,5 +1,5 @@
 import sqlalchemy
-from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase
 
 
@@ -25,12 +25,13 @@ class Player(Base):
     __tablename__ = "player_table"
 
     id = Column(Integer, unique=True, autoincrement=True, primary_key=True)
-    human = Column(String, ForeignKey("human_table.id"))
+    human = Column(String, ForeignKey("human_table.id"), index=True)
     club = Column(Integer, ForeignKey("club_table.id"), nullable=True)
     association_id = Column(String)
+    default_competition = Column(Integer, ForeignKey("competition_table.id"), nullable=True)
 
     def __repr__(self) -> str:
-        return f"Player {self.club=} {self.human=}, {self.association_id=}"
+        return f"Player {self.club=} {self.human=}, {self.association_id=}, {self.default_competition=}"
 
 
 class Competition(Base):
@@ -40,7 +41,7 @@ class Competition(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     association = Column(String)
-    year = Column(DateTime)
+    year = Column(String)
 
     def __repr__(self) -> str:
         return f"Competition {self.id=} {self.name=} {self.association=} {self.year=}"
@@ -64,7 +65,7 @@ class Team(Base):
     id = Column(Integer, primary_key=True)
     rank = Column(String)
     club = Column(Integer, ForeignKey("club_table.id"))
-    year = Column(DateTime)
+    year = Column(String)
 
     def __repr__(self) -> str:
         return f"Team {self.id=} {self.rank=} {self.club=} {self.year=}"
@@ -75,7 +76,7 @@ class TeamMatch(Base):
     __tablename__ = "teammatch_table"
 
     id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
+    date = Column(String)
     competition = Column(Integer, ForeignKey("competition_table.id"))
     result = Column(String)
     home_team = Column(Integer, ForeignKey("team_table.id"))
@@ -124,7 +125,7 @@ class SkillRating(Base):
     competition = Column(Integer, ForeignKey("competition_table.id"))
     rating_mu = Column(Float)
     rating_sigma = Column(Float)
-    latest_update = Column(DateTime)
+    latest_update = Column(String)
 
     def __repr__(self) -> str:
         return f"SkillRating {self.id=} {self.player=} {self.competition=} {self.rating_mu=} {self.rating_sigma=}"
