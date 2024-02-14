@@ -9,6 +9,13 @@ from tqdm import tqdm
 import schema
 from common_queries import get_associations_and_competitions
 
+# TODO Basically needs a rewrite
+# 1.) Toss common queries, query here
+# 2.) This is a script
+# 3.) Iterate matches, sort by date (now a string..?), update ratings
+# 4.) Document change in new table
+# 5.) Include doubles (maybe a separate rating?)
+# 6.) all players that do not have rating through matches get default in default competition
 
 def reset_ratings(engine: Engine):
     """Reset all ratings back to (25, 8.33).
