@@ -77,9 +77,6 @@ def get_player_or_create_player_and_human(
     return player_obj
 
 
-# def get_or_create_singles(teammatch: schema.TeamMatch, home_player_name: str, away_player_name: str, result: str):
-
-
 def reorder_name(player: str):
     """Reorder lastname, name(s) format into name(s) surname.
 
@@ -203,8 +200,9 @@ def populate_competitions(
         session.begin()
         for assoc, comps in associations_competitions.items():
             for comp in comps:
-                if assoc in comp:
-                    comp.replace("assoc").strip()
+                # TODO This would be also necessary everywhere we filter comp by name
+                # if assoc in comp:
+                #     comp.replace(assoc, "").strip()
                 try:
                     comp_obj = (
                         session.query(schema.Competition)
@@ -453,13 +451,16 @@ def populate_teammatches(
                 comp_obj = session.execute(comp_stmt).first()
                 logging.debug(f"Found competition: {comp_obj}")
 
+                home_team_name = match["home_team"].replace("(Jgd.)", "").strip()
+                away_team_name = match["away_team"].replace("(Jgd.)", "").strip()
+
                 home_stmt = (
                     select(schema.Team.id)
                     .join(schema.Club)
                     .where(
                         and_(
-                            schema.Team.rank == match["home_team"][-1],
-                            schema.Club.name == match["home_team"][:-2],
+                            schema.Team.rank == home_team_name[-1],
+                            schema.Club.name == home_team_name[:-2],
                         )
                     )
                 )
@@ -471,8 +472,8 @@ def populate_teammatches(
                     .join(schema.Club)
                     .where(
                         and_(
-                            schema.Team.rank == match["away_team"][-1],
-                            schema.Club.name == match["away_team"][:-2],
+                            schema.Team.rank == away_team_name[-1],
+                            schema.Club.name == away_team_name[:-2],
                         )
                     )
                 )

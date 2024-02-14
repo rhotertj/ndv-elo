@@ -41,6 +41,7 @@ class Crawler2K:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        logging.info(traceback)
         self.browser.quit()
 
     @property
@@ -204,7 +205,7 @@ class Crawler2K:
 
                     team_id = team_heading.get_attribute("id").replace("teamTopic", "")
 
-                    club_team_name = team_heading.get_attribute("textContent").strip()
+                    club_team_name = team_heading.get_attribute("textContent").replace("(Jgd.)", "").strip()
                     club, team = club_team_name[:-2], club_team_name[-1]
                     club = club.strip()
                     logging.debug(f"Crawled club: {club}")
