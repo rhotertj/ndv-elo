@@ -4,6 +4,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
+import os
 
 sys.path.append(r"S:\Dokumente\Code\ndv-elo\src")
 # trunk-ignore(ruff/E402)
@@ -83,7 +84,7 @@ if "__main__" == __name__:
     logging.basicConfig(encoding="utf-8", level=logging.INFO)
 
     data_path = Path(args.path)
-    # os.makedirs(data_path, exist_ok=True)
+    os.makedirs(data_path, exist_ok=True)
     season = datetime(args.season, 8, 1)
     if not args.date:
         from_date = season
@@ -122,11 +123,13 @@ if "__main__" == __name__:
                     time_str = datetime.fromisoformat(data["crawled_date"]).strftime(
                         "%Y-%m-%d-T%H+%M+%S"
                     )
+                    os.makedirs(data_path / f"{season}", exist_ok=True)
                     with open(
                         data_path / f"{season}" / f"{a}_{c}_{time_str}.json",
                         "w+",
                     ) as f:
                         json.dump(data, f)
                     jobs.remove(job)
-                except Exception:
+                except Exception as e:
                     logging.error(f"{c} crashed, up for retry")
+                    logging.error(e)
