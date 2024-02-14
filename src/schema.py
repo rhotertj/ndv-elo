@@ -1,4 +1,3 @@
-import sqlalchemy
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase
 
@@ -28,7 +27,9 @@ class Player(Base):
     human = Column(String, ForeignKey("human_table.id"), index=True)
     club = Column(Integer, ForeignKey("club_table.id"), nullable=True)
     association_id = Column(String)
-    default_competition = Column(Integer, ForeignKey("competition_table.id"), nullable=True)
+    default_competition = Column(
+        Integer, ForeignKey("competition_table.id"), nullable=True
+    )
 
     def __repr__(self) -> str:
         return f"Player {self.club=} {self.human=}, {self.association_id=}, {self.default_competition=}"
@@ -129,17 +130,3 @@ class SkillRating(Base):
 
     def __repr__(self) -> str:
         return f"SkillRating {self.id=} {self.player=} {self.competition=} {self.rating_mu=} {self.rating_sigma=}"
-
-
-if "__main__" == __name__:
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Create a new database")
-
-    parser.add_argument("--filename")
-    args = parser.parse_args()
-
-    fn = args.filename
-
-    engine = sqlalchemy.create_engine(f"sqlite:///{fn}")
-    Base.metadata.create_all(engine)

@@ -1,14 +1,14 @@
 import concurrent.futures
 import json
 import logging
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
-import os
 
 sys.path.append(r"S:\Dokumente\Code\ndv-elo\src")
-# trunk-ignore(ruff/E402)
-from crawler import Crawler2K
+sys.path.append(str(Path(".").absolute()))
+from src.crawler import Crawler2K
 
 
 def crawl_competition(season, results, association, competition, from_date):

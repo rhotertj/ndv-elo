@@ -1,9 +1,7 @@
-import json
 import logging
 import time
 from collections import defaultdict
 from datetime import datetime
-from pathlib import Path
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -303,75 +301,3 @@ class Crawler2K:
                             matchdays.append(matchday_info)
                             matches.append(results)
         return matchdays, matches
-
-
-if "__main__" == __name__:
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Crawl data from 2k app.")
-
-    parser.add_argument(
-        "--date",
-        help="Matches before this date are ignored. Expects YYYY-MM-DD.",
-        required=False,
-    )
-    parser.add_argument(
-        "--path", help="Destination for the crawled data.", required=True
-    )
-    parser.add_argument(
-        "--season",
-        help="What season we crawl. Expects YYYY (will be set to first of august that year.)",
-        required=True,
-        type=int,
-    )
-    parser.add_argument(
-        "--associations",
-        help="Limit associations to be crawled.",
-        nargs="*",
-        default=["DBH", "NDV"],
-    )
-    args = parser.parse_args()
-
-    data_path = Path(args.path)
-    # os.makedirs(data_path, exist_ok=True)
-    season = datetime(args.season, 8, 1)
-    if not args.date:
-        from_date = season
-    else:
-        from_date = datetime.fromisoformat(args.date)
-    logging.info(f"Only checking matches past {from_date}")
-
-    results = {}
-    results["from_date"] = from_date.isoformat()
-    results["crawled_date"] = datetime.now().isoformat()
-    results["season"] = season.isoformat()
-    results["crawled_competitions"] = {}
-    # Crawl
-
-    with Crawler2K(args.season) as crawler:
-        if args.associations[0] == "all":
-            assocs = crawler.get_associations()
-        else:
-            assocs = args.associations
-        for a in assocs:
-            comps = crawler.get_competitions(a)
-            results["crawled_competitions"][a] = []
-            results[a] = {}
-            for comp in comps:
-                results["crawled_competitions"][a].append(comp)
-                results[a][comp] = {}
-                clubs_teams, players = crawler.get_clubs_and_teams([a], [comp])
-                matchdays, matches = crawler.get_matches(
-                    [a], [comp], from_date=from_date
-                )
-                results[a][comp]["clubs_teams"] = {
-                    club: list(teams) for club, teams in clubs_teams.items()
-                }
-                results[a][comp]["matches"] = matches
-                results[a][comp]["players"] = players
-                for match in matchdays:
-                    match["date"] = match["date"].isoformat()
-                results[a][comp]["team_matches"] = matchdays
-
-    with open(data_path, "w+") as f:
-        json.dump(results, f)
