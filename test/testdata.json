@@ -1,0 +1,1405 @@
+{
+    "from_date": "2024-01-26T00:00:00",
+    "crawled_date": "2024-02-11T18:49:34.340639",
+    "season": "2023-08-01T00:00:00",
+    "crawled_competitions": {
+        "DBH": [
+            "Kreisliga 5"
+        ]
+    },
+    "DBH": {
+        "Kreisliga 5": {
+            "clubs_teams": {
+                "Dart Akademie Hannover e.V.": [
+                    "C"
+                ],
+                "Dart Devils Glissen": [
+                    "B"
+                ],
+                "DC Langendamm e.V.": [
+                    "B"
+                ],
+                "DC Sloths Steyerberg": [
+                    "B"
+                ],
+                "DSG Mittelweser": [
+                    "A"
+                ],
+                "Neust\u00e4dter R\u00fcbendarter e.V.": [
+                    "C",
+                    "B"
+                ],
+                "Selly Pally Darters": [
+                    "A"
+                ],
+                "SV Frielingen 26ers": [
+                    "A"
+                ],
+                "TSV Poggenhagen e.V.": [
+                    "A"
+                ]
+            },
+            "matches": [
+                [
+                    {
+                        "home_player": "P\u00f6schke, Holger",
+                        "result": "3:0",
+                        "away_player": "Krone, Nicolas",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Geiges, Frederick",
+                        "result": "0:3",
+                        "away_player": "Rhotert, Jim",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Hockney, Graham",
+                        "result": "0:3",
+                        "away_player": "Lefherz, Tile",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Wei\u00df, Andreas",
+                        "result": "1:3",
+                        "away_player": "Jersch, Olaf",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "P\u00f6schke, Holger / Hockney, Graham",
+                        "result": "0:3",
+                        "away_player": "Krone, Nicolas / Rhotert, Jim",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Geiges, Frederick / Wei\u00df, Andreas",
+                        "result": "1:3",
+                        "away_player": "Lefherz, Tile / Jersch, Olaf",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "P\u00f6schke, Holger",
+                        "result": "3:1",
+                        "away_player": "Rhotert, Jim",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Geiges, Frederick",
+                        "result": "0:3",
+                        "away_player": "Lefherz, Tile",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Hockney, Graham",
+                        "result": "1:3",
+                        "away_player": "Jersch, Olaf",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Wei\u00df, Andreas",
+                        "result": "1:3",
+                        "away_player": "Krone, Nicolas",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "P\u00f6schke, Holger / Hockney, Graham",
+                        "result": "2:3",
+                        "away_player": "Lefherz, Tile / Jersch, Olaf",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Geiges, Frederick / Wei\u00df, Andreas",
+                        "result": "1:3",
+                        "away_player": "Krone, Nicolas / Rhotert, Jim",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Rehburg, Jeremy",
+                        "result": "2:3",
+                        "away_player": "Schulze, Florian",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Ersfeld, Ralf",
+                        "result": "0:3",
+                        "away_player": "Schr\u00f6der, Hauke",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Lorenz, Sebastian",
+                        "result": "3:1",
+                        "away_player": "M\u00fcller, Rolf",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Laube, Andreas",
+                        "result": "0:3",
+                        "away_player": "Meyer, Milan",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Ersfeld, Ralf / Rehburg, Jeremy",
+                        "result": "1:3",
+                        "away_player": "M\u00fcller, Rolf / Meyer, Milan",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Laube, Andreas / Lorenz, Sebastian",
+                        "result": "3:0",
+                        "away_player": "Schr\u00f6der, Hauke / Andermann, Moritz",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Rehburg, Jeremy",
+                        "result": "0:3",
+                        "away_player": "Schr\u00f6der, Hauke",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Ersfeld, Ralf",
+                        "result": "2:3",
+                        "away_player": "Andermann, Moritz",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Lorenz, Sebastian",
+                        "result": "3:1",
+                        "away_player": "Meyer, Milan",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Laube, Andreas",
+                        "result": "1:3",
+                        "away_player": "Schulze, Florian",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Ersfeld, Ralf / Rehburg, Jeremy",
+                        "result": "1:3",
+                        "away_player": "Schr\u00f6der, Hauke / Schr\u00f6der, Hauke",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Laube, Andreas / Lorenz, Sebastian",
+                        "result": "3:2",
+                        "away_player": "M\u00fcller, Rolf / Meyer, Milan",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Schmidt, J\u00f6rn",
+                        "result": "3:2",
+                        "away_player": "Quandt, Benjamin",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Wade, Christian",
+                        "result": "1:3",
+                        "away_player": "Voigt, Sebastian",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Rettschlag, Sebastian",
+                        "result": "2:3",
+                        "away_player": "Geisler, Markus",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Windt, Wolfgang",
+                        "result": "0:3",
+                        "away_player": "Jess, Benedikt",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Schmidt, J\u00f6rn / Rettschlag, Sebastian",
+                        "result": "3:0",
+                        "away_player": "Quandt, Benjamin / Geisler, Markus",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Wade, Christian / Windt, Wolfgang",
+                        "result": "3:2",
+                        "away_player": "Voigt, Sebastian / Jess, Benedikt",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Schmidt, J\u00f6rn",
+                        "result": "1:3",
+                        "away_player": "Voigt, Sebastian",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Wade, Christian",
+                        "result": "3:0",
+                        "away_player": "Geisler, Markus",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Rettschlag, Sebastian",
+                        "result": "0:3",
+                        "away_player": "Jess, Benedikt",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Windt, Wolfgang",
+                        "result": "3:0",
+                        "away_player": "N\u00fclle, Dennis",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Schmidt, J\u00f6rn / Rettschlag, Sebastian",
+                        "result": "3:1",
+                        "away_player": "Voigt, Sebastian / Jess, Benedikt",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Wade, Christian / Windt, Wolfgang",
+                        "result": "3:0",
+                        "away_player": "Geisler, Markus / N\u00fclle, Dennis",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Drechsler, Christian",
+                        "result": "3:0",
+                        "away_player": "Wenske, Carola",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Werner, Torsten",
+                        "result": "3:2",
+                        "away_player": "Bilda, Heinz",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Paul, Thomas",
+                        "result": "2:3",
+                        "away_player": "Guinn, Christin",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "M\u00f6rling, Lars",
+                        "result": "1:3",
+                        "away_player": "Walther, Peter",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Drechsler, Christian / Werner, Torsten",
+                        "result": "2:3",
+                        "away_player": "Guinn, Christin / Walther, Peter",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Paul, Thomas / Marschall, Thomas",
+                        "result": "3:2",
+                        "away_player": "Bilda, Heinz / Wenske, Carola",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Drechsler, Christian",
+                        "result": "3:0",
+                        "away_player": "Bilda, Heinz",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Werner, Torsten",
+                        "result": "3:1",
+                        "away_player": "Guinn, Christin",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Paul, Thomas",
+                        "result": "0:3",
+                        "away_player": "Walther, Peter",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Marschall, Thomas",
+                        "result": "3:0",
+                        "away_player": "Wenske, Carola",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Drechsler, Christian / M\u00f6rling, Lars",
+                        "result": "3:0",
+                        "away_player": "Bilda, Heinz / Wenske, Carola",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Paul, Thomas / Marschall, Thomas",
+                        "result": "3:0",
+                        "away_player": "Guinn, Christin / Walther, Peter",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Schmidt, Mirco",
+                        "result": "2:3",
+                        "away_player": "Stanicke, Timo",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Schmidt, Mirco",
+                        "result": "2:3",
+                        "away_player": "Andermann, Moritz",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Claus, Christoph",
+                        "result": "3:1",
+                        "away_player": "Lauer, Franz",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Fa\u00dfmann, Lutz",
+                        "result": "0:3",
+                        "away_player": "Dreppenstedt, Dirk",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Schmidt, Mirco / Marcik, Tobias",
+                        "result": "3:1",
+                        "away_player": "Stanicke, Timo / Gladow, Carola",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "von Ohlen, Frank / Fa\u00dfmann, Lutz",
+                        "result": "1:3",
+                        "away_player": "Lauer, Franz / Dreppenstedt, Dirk",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Schmidt, Mirco",
+                        "result": "3:2",
+                        "away_player": "Andermann, Moritz",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Marcik, Tobias",
+                        "result": "2:3",
+                        "away_player": "Lauer, Franz",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Claus, Christoph",
+                        "result": "3:0",
+                        "away_player": "Gladow, Carola",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "von Ohlen, Frank",
+                        "result": "2:3",
+                        "away_player": "Stanicke, Timo",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Schmidt, Mirco / Marcik, Tobias",
+                        "result": "3:2",
+                        "away_player": "Andermann, Moritz / Lauer, Franz",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Claus, Christoph / Fa\u00dfmann, Lutz",
+                        "result": "2:3",
+                        "away_player": "Gladow, Carola / Stanicke, Timo",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Jess, Benedikt",
+                        "result": "1:3",
+                        "away_player": "Rhotert, Jim",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Quandt, Benjamin",
+                        "result": "3:1",
+                        "away_player": "Klenk, Finn",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Geisler, Markus",
+                        "result": "2:3",
+                        "away_player": "Renke, Christoph",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Voigt, Sebastian",
+                        "result": "1:3",
+                        "away_player": "Jersch, Olaf",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Jess, Benedikt / Geisler, Markus",
+                        "result": "0:3",
+                        "away_player": "Rhotert, Jim / Klenk, Finn",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Quandt, Benjamin / Voigt, Sebastian",
+                        "result": "3:0",
+                        "away_player": "Renke, Christoph / Jersch, Olaf",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Jess, Benedikt",
+                        "result": "0:3",
+                        "away_player": "Klenk, Finn",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "N\u00fclle, Dennis",
+                        "result": "2:3",
+                        "away_player": "Renke, Christoph",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Franzoi, Benjamin",
+                        "result": "2:3",
+                        "away_player": "Jersch, Olaf",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Voigt, Sebastian",
+                        "result": "3:1",
+                        "away_player": "Rhotert, Jim",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Jess, Benedikt / Franzoi, Benjamin",
+                        "result": "3:0",
+                        "away_player": "Renke, Christoph / Jersch, Olaf",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "N\u00fclle, Dennis / Voigt, Sebastian",
+                        "result": "1:3",
+                        "away_player": "Rhotert, Jim / Klenk, Finn",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Marcik, Tobias",
+                        "result": "0:3",
+                        "away_player": "Rohlfs, Bastian",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "von Ohlen, Frank",
+                        "result": "0:3",
+                        "away_player": "Friebe, Nino",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Wolff, Tobias",
+                        "result": "1:3",
+                        "away_player": "Schr\u00f6der, Hauke",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Schmidt, Mirco",
+                        "result": "3:0",
+                        "away_player": "Meyer, Milan",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Marcik, Tobias / Schmidt, Mirco",
+                        "result": "1:3",
+                        "away_player": "Mendel, Sascha / Friebe, Nino",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Wolff, Tobias / von Ohlen, Frank",
+                        "result": "2:3",
+                        "away_player": "Rohlfs, Bastian / Schr\u00f6der, Hauke",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Marcik, Tobias",
+                        "result": "3:2",
+                        "away_player": "Mendel, Sascha",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "von Ohlen, Frank",
+                        "result": "0:3",
+                        "away_player": "Schr\u00f6der, Hauke",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Wolff, Tobias",
+                        "result": "2:3",
+                        "away_player": "Meyer, Milan",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Schmidt, Mirco",
+                        "result": "2:3",
+                        "away_player": "Rohlfs, Bastian",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Marcik, Tobias / Schmidt, Mirco",
+                        "result": "2:3",
+                        "away_player": "Rohlfs, Bastian / Meyer, Milan",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Wolff, Tobias / von Ohlen, Frank",
+                        "result": "3:2",
+                        "away_player": "Mendel, Sascha / Friebe, Nino",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Till, Marcel",
+                        "result": "0:3",
+                        "away_player": "Walther, Peter",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Wade, Christian",
+                        "result": "3:1",
+                        "away_player": "Bilda, Heinz",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Repper, Arne",
+                        "result": "3:0",
+                        "away_player": "Guinn, Christin",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Bick, Patrick",
+                        "result": "3:0",
+                        "away_player": "Nauenburg, Vincent",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Till, Marcel / Schmidt, J\u00f6rn",
+                        "result": "3:0",
+                        "away_player": "Guinn, Christin / Nauenburg, Vincent",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Wade, Christian / Bick, Patrick",
+                        "result": "1:3",
+                        "away_player": "Walther, Peter / Bilda, Heinz",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Till, Marcel",
+                        "result": "3:1",
+                        "away_player": "Bilda, Heinz",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Schmidt, J\u00f6rn",
+                        "result": "3:0",
+                        "away_player": "Guinn, Christin",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Repper, Arne",
+                        "result": "3:0",
+                        "away_player": "Nauenburg, Vincent",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Bick, Patrick",
+                        "result": "1:3",
+                        "away_player": "Walther, Peter",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Till, Marcel / Schmidt, J\u00f6rn",
+                        "result": "1:3",
+                        "away_player": "Walther, Peter / Bilda, Heinz",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Hirschland, Robin / Bick, Patrick",
+                        "result": "3:0",
+                        "away_player": "Guinn, Christin / Nauenburg, Vincent",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Kunert, Florian",
+                        "result": "3:0",
+                        "away_player": "Scharnhorst, Dennis",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Andermann, Moritz",
+                        "result": "3:0",
+                        "away_player": "Wei\u00df, Andreas",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Lauer, Franz",
+                        "result": "3:1",
+                        "away_player": "Hockney, Graham",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Stanicke, Timo",
+                        "result": "1:3",
+                        "away_player": "P\u00f6schke, Holger",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Kunert, Florian / Gladow, Carola",
+                        "result": "3:0",
+                        "away_player": "Scharnhorst, Dennis / Hockney, Graham",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Stanicke, Timo / Lauer, Franz",
+                        "result": "3:1",
+                        "away_player": "Wei\u00df, Andreas / P\u00f6schke, Holger",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Kunert, Florian",
+                        "result": "3:0",
+                        "away_player": "Wei\u00df, Andreas",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Andermann, Moritz",
+                        "result": "3:1",
+                        "away_player": "Hockney, Graham",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Lauer, Franz",
+                        "result": "1:3",
+                        "away_player": "P\u00f6schke, Holger",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Stanicke, Timo",
+                        "result": "3:2",
+                        "away_player": "Scharnhorst, Dennis",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Kunert, Florian / Gladow, Carola",
+                        "result": "0:3",
+                        "away_player": "Wei\u00df, Andreas / P\u00f6schke, Holger",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Stanicke, Timo / Lauer, Franz",
+                        "result": "3:1",
+                        "away_player": "Hockney, Graham / Scharnhorst, Dennis",
+                        "match_number": 2
+                    }
+                ],
+                [
+                    {
+                        "home_player": "Paul, Thomas",
+                        "result": "3:0",
+                        "away_player": "Rehburg, Jeremy",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "M\u00f6rling, Lars",
+                        "result": "3:2",
+                        "away_player": "Lorenz, Marcel",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Drechsler, Christian",
+                        "result": "3:2",
+                        "away_player": "Laube, Andreas",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Marschall, Thomas",
+                        "result": "3:0",
+                        "away_player": "Lorenz, Sebastian",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "Drechsler, Christian / Rolfes, Dennis",
+                        "result": "3:0",
+                        "away_player": "Rehburg, Jeremy / Hacke, Uwe",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Paul, Thomas / Marschall, Thomas",
+                        "result": "1:3",
+                        "away_player": "Laube, Andreas / Lorenz, Sebastian",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Paul, Thomas",
+                        "result": "3:2",
+                        "away_player": "Lorenz, Marcel",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Tietz, Katja",
+                        "result": "3:1",
+                        "away_player": "Laube, Andreas",
+                        "match_number": 2
+                    },
+                    {
+                        "home_player": "Drechsler, Christian",
+                        "result": "3:0",
+                        "away_player": "Lorenz, Sebastian",
+                        "match_number": 3
+                    },
+                    {
+                        "home_player": "Marschall, Thomas",
+                        "result": "3:0",
+                        "away_player": "Hacke, Uwe",
+                        "match_number": 4
+                    },
+                    {
+                        "home_player": "M\u00f6rling, Lars / Rolfes, Dennis",
+                        "result": "3:2",
+                        "away_player": "Laube, Andreas / Lorenz, Sebastian",
+                        "match_number": 1
+                    },
+                    {
+                        "home_player": "Paul, Thomas / Marschall, Thomas",
+                        "result": "1:3",
+                        "away_player": "Rehburg, Jeremy / Lorenz, Marcel",
+                        "match_number": 2
+                    }
+                ]
+            ],
+            "players": [
+                [
+                    "102018",
+                    "M\u00e4mm\u00e4d Gulijev",
+                    "Dart Akademie Hannover e.V."
+                ],
+                [
+                    "102022",
+                    "Olaf Jersch",
+                    "Dart Akademie Hannover e.V."
+                ],
+                [
+                    "102025",
+                    "Finn Klenk",
+                    "Dart Akademie Hannover e.V."
+                ],
+                [
+                    "102030",
+                    "Nicolas Krone",
+                    "Dart Akademie Hannover e.V."
+                ],
+                [
+                    "102034",
+                    "Tile Lefherz",
+                    "Dart Akademie Hannover e.V."
+                ],
+                [
+                    "102035",
+                    "Jonas Maack",
+                    "Dart Akademie Hannover e.V."
+                ],
+                [
+                    "102047",
+                    "Christoph Renke",
+                    "Dart Akademie Hannover e.V."
+                ],
+                [
+                    "102048",
+                    "Jim Rhotert",
+                    "Dart Akademie Hannover e.V."
+                ],
+                [
+                    "166021",
+                    "Heinz Bilda",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "166016",
+                    "Anika Gieszer",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "166004",
+                    "Christin Guinn",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "166029",
+                    "Friedrich Kr\u00fcger",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "166015",
+                    "Vincent Nauenburg",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "166002",
+                    "Kim Petrich",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "166028",
+                    "Fabio Reul",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "166023",
+                    "Peter Walther",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "166027",
+                    "Carola Wenske",
+                    "Dart Devils Glissen"
+                ],
+                [
+                    "161004",
+                    "Moritz Andermann",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161050",
+                    "Dirk Dreppenstedt",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161045",
+                    "Patrick Fiedler",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161021",
+                    "Carola Gladow",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161051",
+                    "Merlin Hellwig",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161023",
+                    "Fiona Kolkmann",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161031",
+                    "Florian Kunert",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161003",
+                    "Franz Lauer",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161044",
+                    "Bj\u00f6rn Lehmann",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161001",
+                    "Timo Stanicke",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161046",
+                    "Tobias Wegner",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "161030",
+                    "Jeremie Wolf",
+                    "DC Langendamm e.V."
+                ],
+                [
+                    "163025",
+                    "Jaron Belitz",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163019",
+                    "Christian Drechsler",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163024",
+                    "Tino Julitz",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163002",
+                    "Benjamin Manske",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163020",
+                    "Thomas Marschall",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163006",
+                    "Lars M\u00f6rling",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163022",
+                    "Thomas Paul",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163004",
+                    "Dennis Rolfes",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163012",
+                    "Matthias Rudek",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163009",
+                    "Sven Ru\u00dfmeyer",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163014",
+                    "Till Schmidt",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163021",
+                    "Katja Tietz",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "163017",
+                    "Torsten Werner",
+                    "DC Sloths Steyerberg"
+                ],
+                [
+                    "109006",
+                    "Moritz Andermann",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109001",
+                    "Sebastian Bach",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109003",
+                    "Nino Friebe",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109013",
+                    "Alexander Koch",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109012",
+                    "Sascha Mendel",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109005",
+                    "Milan Meyer",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109015",
+                    "Rolf M\u00fcller",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109014",
+                    "Marvin Purschwitz",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109002",
+                    "Bastian Rohlfs",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109004",
+                    "Hauke Schr\u00f6der",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "109010",
+                    "Florian Schulze",
+                    "DSG Mittelweser"
+                ],
+                [
+                    "129016",
+                    "Patrick Bick",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129023",
+                    "Robin Hirschland",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129022",
+                    "Rene Ihrig",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129007",
+                    "Lukas Paul",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129005",
+                    "Arne Repper",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129008",
+                    "Sebastian Rettschlag",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129012",
+                    "J\u00f6rn Schmidt",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129024",
+                    "Marcel Till",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129010",
+                    "Christian Wade",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129011",
+                    "Wolfgang Windt",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129002",
+                    "Leon Ertel",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129013",
+                    "Dirk Frese",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129006",
+                    "Frederick Geiges",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129009",
+                    "Graham Hockney",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129021",
+                    "Christian Paulus",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129004",
+                    "Holger P\u00f6schke",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129015",
+                    "Dennis Scharnhorst",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129017",
+                    "Michael Wade",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "129003",
+                    "Andreas Wei\u00df",
+                    "Neust\u00e4dter R\u00fcbendarter e.V."
+                ],
+                [
+                    "194002",
+                    "Jonas Beck",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194005",
+                    "Christoph Claus",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194011",
+                    "Jens Dieckmann",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194008",
+                    "Lutz Fa\u00dfmann",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194006",
+                    "Philipp Homfeld",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194009",
+                    "Julia Kahlke",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194004",
+                    "Daniel Marcik",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194001",
+                    "Tobias Marcik",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194010",
+                    "Mirco Schmidt",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194007",
+                    "Frank von Ohlen",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "194003",
+                    "Tobias Wolff",
+                    "Selly Pally Darters"
+                ],
+                [
+                    "199008",
+                    "Ralf Ersfeld",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199006",
+                    "Murad Gecerg\u00fcn",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199007",
+                    "Daniel Guropec",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199011",
+                    "Uwe Hacke",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199003",
+                    "Andreas Laube",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199005",
+                    "Marcel Lorenz",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199004",
+                    "Nicole Lorenz",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199001",
+                    "Sebastian Lorenz",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199002",
+                    "Sean M\u00fccke-Gecerg\u00fcn",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199009",
+                    "Jeremy Rehburg",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "199010",
+                    "Joachim Werse",
+                    "SV Frielingen 26ers"
+                ],
+                [
+                    "119012",
+                    "Benjamin Franzoi",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119003",
+                    "Markus Geisler",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119008",
+                    "Thomas Hlawatschek",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119001",
+                    "Benedikt Jess",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119004",
+                    "Marvin Lindenberg",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119010",
+                    "Maik Niegisch",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119006",
+                    "Dennis N\u00fclle",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119002",
+                    "Benjamin Quandt",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119011",
+                    "Harald Schwarz",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119005",
+                    "Sebastian Voigt",
+                    "TSV Poggenhagen e.V."
+                ],
+                [
+                    "119007",
+                    "Thomas Willmann",
+                    "TSV Poggenhagen e.V."
+                ]
+            ],
+            "team_matches": [
+                {
+                    "date": "2024-01-26T19:00:00",
+                    "home_team": "Neust\u00e4dter R\u00fcbendarter e.V. C",
+                    "away_team": "Dart Akademie Hannover e.V. C",
+                    "result": "2:10",
+                    "legs": "13 : 31",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-01-26T19:00:00",
+                    "home_team": "SV Frielingen 26ers A",
+                    "away_team": "DSG Mittelweser A",
+                    "result": "4:8",
+                    "legs": "19 : 28",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-01-26T19:00:00",
+                    "home_team": "Neust\u00e4dter R\u00fcbendarter e.V. B",
+                    "away_team": "TSV Poggenhagen e.V. A",
+                    "result": "7:5",
+                    "legs": "25 : 20",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-01-27T18:00:00",
+                    "home_team": "DC Sloths Steyerberg B",
+                    "away_team": "Dart Devils Glissen B",
+                    "result": "8:4",
+                    "legs": "29 : 17",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-01-27T17:00:00",
+                    "home_team": "Selly Pally Darters A",
+                    "away_team": "DC Langendamm e.V. B",
+                    "result": "5:7",
+                    "legs": "26 : 27",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-02-02T19:00:00",
+                    "home_team": "TSV Poggenhagen e.V. A",
+                    "away_team": "Dart Akademie Hannover e.V. C",
+                    "result": "4:8",
+                    "legs": "21 : 26",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-02-03T17:00:00",
+                    "home_team": "Selly Pally Darters A",
+                    "away_team": "DSG Mittelweser A",
+                    "result": "3:9",
+                    "legs": "19 : 31",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-02-03T19:00:00",
+                    "home_team": "Neust\u00e4dter R\u00fcbendarter e.V. B",
+                    "away_team": "Dart Devils Glissen B",
+                    "result": "8:4",
+                    "legs": "27 : 14",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-02-03T19:00:00",
+                    "home_team": "DC Langendamm e.V. B",
+                    "away_team": "Neust\u00e4dter R\u00fcbendarter e.V. C",
+                    "result": "9:3",
+                    "legs": "29 : 15",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                },
+                {
+                    "date": "2024-02-03T18:00:00",
+                    "home_team": "DC Sloths Steyerberg B",
+                    "away_team": "SV Frielingen 26ers A",
+                    "result": "10:2",
+                    "legs": "32 : 15",
+                    "competition": "Kreisliga 5",
+                    "association": "DBH"
+                }
+            ]
+        }
+    }
+}

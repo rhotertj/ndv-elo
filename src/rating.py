@@ -38,7 +38,7 @@ def compute_ratings(engine: Engine, competition: schema.Competition):
             .order_by(schema.TeamMatch.date)
         )
         team_matches = session.execute(stmt).all()
-        for match in team_matches:
+        for match in tqdm(team_matches):
             match = match[0]
             if match.used_for_rating:
                 continue
@@ -57,7 +57,7 @@ def compute_ratings(engine: Engine, competition: schema.Competition):
             singles = session.execute(singles_stmt).all()
             # doubles = session.execute(doubles_stmt).all()
 
-            for single in tqdm(singles):
+            for single in singles:
 
                 home_player_rating_stmt = select(schema.SkillRating).where(
                     (schema.SkillRating.player == single[0].home_player)
