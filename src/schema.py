@@ -8,7 +8,7 @@ class Base(DeclarativeBase):
 
 class Human(Base):
 
-    __tablename__ = "human"
+    __tablename__ = "Human"
 
     id = Column(String, unique=True, primary_key=True)
     name = Column(String)
@@ -21,14 +21,14 @@ class Human(Base):
 
 class Player(Base):
 
-    __tablename__ = "player"
+    __tablename__ = "Player"
 
     id = Column(Integer, unique=True, autoincrement=True, primary_key=True)
-    human = Column(String, ForeignKey("human.id"), index=True)
-    club = Column(Integer, ForeignKey("club.id"), nullable=True)
+    human = Column(String, ForeignKey("Human.id"), index=True)
+    club = Column(Integer, ForeignKey("Club.id"), nullable=True)
     association_id = Column(String)
     default_competition = Column(
-        Integer, ForeignKey("competition.id"), nullable=True
+        Integer, ForeignKey("Competition.id"), nullable=True
     )
 
     def __repr__(self) -> str:
@@ -37,7 +37,7 @@ class Player(Base):
 
 class Competition(Base):
 
-    __tablename__ = "competition"
+    __tablename__ = "Competition"
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -50,7 +50,7 @@ class Competition(Base):
 
 class Club(Base):
 
-    __tablename__ = "club"
+    __tablename__ = "Club"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True)
@@ -61,11 +61,11 @@ class Club(Base):
 
 class Team(Base):
 
-    __tablename__ = "team"
+    __tablename__ = "Team"
 
     id = Column(Integer, primary_key=True)
     rank = Column(String)
-    club = Column(Integer, ForeignKey("club.id"))
+    club = Column(Integer, ForeignKey("Club.id"))
     year = Column(String)
 
     def __repr__(self) -> str:
@@ -74,14 +74,14 @@ class Team(Base):
 
 class TeamMatch(Base):
 
-    __tablename__ = "teammatch"
+    __tablename__ = "Teammatch"
 
     id = Column(Integer, primary_key=True)
     date = Column(String)
-    competition = Column(Integer, ForeignKey("competition.id"))
+    competition = Column(Integer, ForeignKey("Competition.id"))
     result = Column(String)
-    home_team = Column(Integer, ForeignKey("team.id"))
-    away_team = Column(Integer, ForeignKey("team.id"))
+    home_team = Column(Integer, ForeignKey("Team.id"))
+    away_team = Column(Integer, ForeignKey("Team.id"))
     used_for_rating = Column(Boolean, default=False)
 
     def __repr__(self) -> str:
@@ -90,12 +90,12 @@ class TeamMatch(Base):
 
 class SinglesMatch(Base):
 
-    __tablename__ = "singlesmatch"
+    __tablename__ = "Singlesmatch"
 
     id = Column(Integer, primary_key=True)
-    team_match = Column(Integer, ForeignKey("teammatch.id"), nullable=True)
-    home_player = Column(Integer, ForeignKey("player.id"))
-    away_player = Column(Integer, ForeignKey("player.id"))
+    team_match = Column(Integer, ForeignKey("Teammatch.id"), nullable=True)
+    home_player = Column(Integer, ForeignKey("Player.id"))
+    away_player = Column(Integer, ForeignKey("Player.id"))
     result = Column(String)  # this could be expanded to home legs, away legs, sets ...
     match_number = Column(Integer)
 
@@ -105,25 +105,25 @@ class SinglesMatch(Base):
 
 class DoublesMatch(Base):
 
-    __tablename__ = "doublesmatch"
+    __tablename__ = "Doublesmatch"
 
     id = Column(Integer, primary_key=True)
-    team_match = Column(Integer, ForeignKey("teammatch.id"), nullable=True)
-    home_player1 = Column(Integer, ForeignKey("player.id"))
-    home_player2 = Column(Integer, ForeignKey("player.id"))
-    away_player1 = Column(Integer, ForeignKey("player.id"))
-    away_player2 = Column(Integer, ForeignKey("player.id"))
+    team_match = Column(Integer, ForeignKey("Teammatch.id"), nullable=True)
+    home_player1 = Column(Integer, ForeignKey("Player.id"))
+    home_player2 = Column(Integer, ForeignKey("Player.id"))
+    away_player1 = Column(Integer, ForeignKey("Player.id"))
+    away_player2 = Column(Integer, ForeignKey("Player.id"))
     result = Column(String)  # this could be expanded to home legs, away legs, sets ...
     match_number = Column(Integer)
 
 
 class SkillRating(Base):
 
-    __tablename__ = "skillrating"
+    __tablename__ = "Skillrating"
 
     id = Column(Integer, primary_key=True)
-    player = Column(Integer, ForeignKey("player.id"))
-    competition = Column(Integer, ForeignKey("competition.id"))
+    player = Column(Integer, ForeignKey("Player.id"))
+    competition = Column(Integer, ForeignKey("Competition.id"))
     rating_mu = Column(Float)
     rating_sigma = Column(Float)
     latest_update = Column(String)
