@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import Engine, and_, select, update
 from sqlalchemy.orm import Session
 
-from ..schema import Club, Competition, Human, Player
+from ..schema import Club, Team, Human, Player, Competition
 
 
 def create_human_id(name):
@@ -16,7 +16,7 @@ def get_player_or_create_player_and_human(
     session: Session,
     name: str,
     club_id: int,
-    default_competition: int = None,
+    team: int = None,
     association_id=None,
     flush_after_add=False,
 ):
@@ -55,7 +55,7 @@ def get_player_or_create_player_and_human(
             human=human_uid,
             association_id=str(association_id),
             club=club_id,
-            default_competition=default_competition,
+            team=team,
         )
         session.add(human_obj)
         session.add(player_obj)
@@ -70,6 +70,15 @@ def get_player_or_create_player_and_human(
             update(Player)
             .where(Player.id == player_obj.id)
             .values(association_id=str(association_id))
+        )
+        session.execute(update_stmt)
+
+    # TODO Check for Team date, maybe update team
+    if player_obj.team is None and team is not None:
+        update_stmt = (
+            update(Player)
+            .where(Player.id == player_obj.id)
+            .values(team=team)
         )
         session.execute(update_stmt)
     return player_obj
@@ -117,7 +126,8 @@ def populate_players(
             raise ValueError(
                 f"Could not find default competition {association} {competition} for players!"
             )
-        for assoc_id, name, club_name in players:
+        # TODO Player gets team instead of competition
+        for assoc_id, name, club_name, team_rank in players:
             name = name.strip()
             try:
                 # Find club first to search player after name within club
@@ -129,11 +139,26 @@ def populate_players(
                         f"Club not found {club_name}. Please create clubs before players."
                     )
 
+                team_stmt = select(Team).where(
+                    and_(
+                        Team.rank == team_rank,
+                        Team.club == club_obj[0].id,
+                        Team.year == season.isoformat(),
+                        Team.competition == comp_obj[0].id
+                    )
+                )
+                team_obj = session.execute(team_stmt).first()
+                if team_obj is None:
+                    raise ValueError(
+                        f"Team not found {club_name, team_rank}. Please create clubs before players."
+                    )
+
+
                 get_player_or_create_player_and_human(
                     session,
                     name,
                     club_obj[0].id,
-                    default_competition=comp_obj[0].id,
+                    team=team_obj[0].id,
                     association_id=assoc_id,
                 )
             except:

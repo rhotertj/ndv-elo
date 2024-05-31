@@ -27,8 +27,8 @@ class Player(Base):
     human = Column(String, ForeignKey("Human.id"), index=True)
     club = Column(Integer, ForeignKey("Club.id"), nullable=True)
     association_id = Column(String)
-    default_competition = Column(
-        Integer, ForeignKey("Competition.id"), nullable=True
+    team = Column(
+        Integer, ForeignKey("Team.id"), nullable=True
     )
 
     def __repr__(self) -> str:
@@ -67,9 +67,10 @@ class Team(Base):
     rank = Column(String)
     club = Column(Integer, ForeignKey("Club.id"))
     year = Column(String)
+    competition = Column(Integer, ForeignKey("Competition.id"))
 
     def __repr__(self) -> str:
-        return f"Team {self.id=} {self.rank=} {self.club=} {self.year=}"
+        return f"Team {self.id=} {self.rank=} {self.club=} {self.year=} {self.competition}"
 
 
 class TeamMatch(Base):
@@ -123,10 +124,10 @@ class SkillRating(Base):
 
     id = Column(Integer, primary_key=True)
     player = Column(Integer, ForeignKey("Player.id"))
-    competition = Column(Integer, ForeignKey("Competition.id"))
+    team = Column(Integer, ForeignKey("Team.id"))
     rating_mu = Column(Float)
     rating_sigma = Column(Float)
     latest_update = Column(String)
 
     def __repr__(self) -> str:
-        return f"SkillRating {self.id=} {self.player=} {self.competition=} {self.rating_mu=} {self.rating_sigma=}"
+        return f"SkillRating {self.id=} {self.player=} {self.team=} {self.rating_mu=} {self.rating_sigma=}"

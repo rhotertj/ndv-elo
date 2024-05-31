@@ -2,6 +2,7 @@ import logging
 import time
 from collections import defaultdict
 from datetime import datetime
+import re
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -39,7 +40,6 @@ class Crawler2K:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        logging.info(traceback)
         self.browser.quit()
 
     @property
@@ -202,11 +202,11 @@ class Crawler2K:
                 for team_heading in team_headings:
 
                     team_id = team_heading.get_attribute("id").replace("teamTopic", "")
-
-                    club_team_name = team_heading.get_attribute("textContent").replace("(Jgd.)", "").strip()
+                    # "Club Name e.V. C (irrelevant extra)" -> "Club Name e.V. C"
+                    club_team_name = re.sub(r'\(.*\)', '', team_heading.get_attribute("textContent")).strip()
                     club, team = club_team_name[:-2], club_team_name[-1]
                     club = club.strip()
-                    logging.debug(f"Crawled club: {club}")
+                    logging.debug(f"Crawled club: {club} {team}")
                     teams[club].add(team)
                     team_data = squad_panel.find_element(By.ID, f"teamData{team_id}")
 
@@ -222,9 +222,9 @@ class Crawler2K:
                         name = f"{' '.join([n.strip() for n in name_split[1:]])} {name_split[0]}".strip()
                         if "Spieler ist nicht" in name:
                             continue
-                        id = player[-1][:-1]
-                        logging.debug(f"Crawled player: {name, id}")
-                        players.append((id, name, club))
+                        player_id = player[-1][:-1]
+                        logging.debug(f"Crawled player: {name, player_id, club, team}")
+                        players.append((player_id, name, club, team))
         return teams, players
 
     def get_matches(

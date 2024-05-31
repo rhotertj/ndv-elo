@@ -54,6 +54,8 @@ if __name__ == "__main__":
                 populate_clubs_and_teams(
                     engine,
                     crawled_results[association][competition]["clubs_teams"],
+                    association,
+                    competition,
                     season=crawled_results["season"],
                 )
                 populate_players(

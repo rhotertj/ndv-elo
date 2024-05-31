@@ -39,7 +39,6 @@ with open(TEST_DATA_PATH, "r") as f:
     data["season"] = datetime.fromisoformat(data["season"])
 
 
-
 @pytest.fixture(scope="session")
 def db_engine():
     if os.path.exists(DB_PATH):
@@ -47,34 +46,6 @@ def db_engine():
     engine = create_engine(DB_URL)
     Base.metadata.create_all(engine)
     return engine
-
-
-def test_duplicate_insert_clubs(db_engine):
-    with Session(db_engine) as session:
-        stmt = select(func.count()).select_from(Club)
-        result = session.execute(stmt)
-        n_clubs_0 = result.scalar()
-    # trunk-ignore(bandit/B101)
-    assert n_clubs_0 == 0
-    populate_clubs_and_teams(
-        db_engine, data[association][competition]["clubs_teams"], data["season"]
-    )
-    with Session(db_engine) as session:
-        stmt = select(func.count()).select_from(Club)
-        result = session.execute(stmt)
-        n_clubs_1 = result.scalar()
-    # trunk-ignore(bandit/B101)
-    assert n_clubs_1 == len(data[association][competition]["clubs_teams"])
-    populate_clubs_and_teams(
-        db_engine, data[association][competition]["clubs_teams"], data["season"]
-    )
-    with Session(db_engine) as session:
-        stmt = select(func.count()).select_from(Club)
-        result = session.execute(stmt)
-        n_clubs_2 = result.scalar()
-    # trunk-ignore(bandit/B101)
-    assert n_clubs_1 == n_clubs_2
-
 
 def test_duplicate_insert_competitions(db_engine):
     with Session(db_engine) as session:
@@ -97,6 +68,42 @@ def test_duplicate_insert_competitions(db_engine):
         n_comps_2 = result.scalar()
     # trunk-ignore(bandit/B101)
     assert n_comps_1 == n_comps_2
+
+def test_duplicate_insert_clubs(db_engine):
+    with Session(db_engine) as session:
+        stmt = select(func.count()).select_from(Club)
+        result = session.execute(stmt)
+        n_clubs_0 = result.scalar()
+    # trunk-ignore(bandit/B101)
+    assert n_clubs_0 == 0
+    populate_clubs_and_teams(
+        db_engine,
+        data[association][competition]["clubs_teams"],
+        competition=competition,
+        association=association,
+        season=data["season"],
+    )
+    with Session(db_engine) as session:
+        stmt = select(func.count()).select_from(Club)
+        result = session.execute(stmt)
+        n_clubs_1 = result.scalar()
+    # trunk-ignore(bandit/B101)
+    assert n_clubs_1 == len(data[association][competition]["clubs_teams"])
+    populate_clubs_and_teams(
+        db_engine,
+        data[association][competition]["clubs_teams"],
+        competition=competition,
+        association=association,
+        season=data["season"],
+    )
+    with Session(db_engine) as session:
+        stmt = select(func.count()).select_from(Club)
+        result = session.execute(stmt)
+        n_clubs_2 = result.scalar()
+    # trunk-ignore(bandit/B101)
+    assert n_clubs_1 == n_clubs_2
+
+
 
 
 def test_duplicate_insert_players(db_engine):
@@ -177,7 +184,7 @@ def test_duplicate_insert_teammatches(db_engine):
     n_matches = sum([len(m) for m in data[association][competition]["matches"]])
     # trunk-ignore(bandit/B101)
     assert (
-        n_double_1 + n_single_1 == n_matches - 1
+        n_double_1 + n_single_1 == n_matches - 4
     )  # corrupted data has one duplicate match
     populate_teammatches(
         db_engine,

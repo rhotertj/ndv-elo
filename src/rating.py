@@ -12,17 +12,17 @@ from .schema import DoublesMatch, Player, SinglesMatch, SkillRating, TeamMatch
 
 
 def get_or_create_player_rating(
-    session: Session, player_id: int, competition_id: int, match_date: datetime
+    session: Session, player_id: int, team_id: int, match_date: datetime
 ):
     player_rating_stmt = select(SkillRating).where(
-        (SkillRating.player == player_id) & (SkillRating.competition == competition_id)
+        (SkillRating.player == player_id) & (SkillRating.team == team_id)
     )
     player_rating = session.execute(player_rating_stmt).first()
 
     if not player_rating:
         player_rating = SkillRating(
             player=player_id,
-            competition=competition_id,
+            team=team_id,
             rating_mu=trueskill.MU,
             rating_sigma=trueskill.SIGMA,
             latest_update=match_date,
@@ -54,14 +54,14 @@ def update_singles(session: Session, team_match: TeamMatch, singles: list):
         home_player_rating = get_or_create_player_rating(
             session=session,
             player_id=single.home_player,
-            competition_id=team_match.competition,
+            team_id=team_match.home_team,
             match_date=team_match.date,
         )
 
         away_player_rating = get_or_create_player_rating(
             session=session,
             player_id=single.away_player,
-            competition_id=team_match.competition,
+            team_id=team_match.away_team,
             match_date=team_match.date,
         )
 
@@ -116,7 +116,7 @@ def update_doubles(session: Session, team_match: TeamMatch, doubles: list):
         home_player1_rating = get_or_create_player_rating(
             session=session,
             player_id=double.home_player1,
-            competition_id=team_match.competition,
+            team_id=team_match.home_team,
             match_date=team_match.date,
         )
 
@@ -128,7 +128,7 @@ def update_doubles(session: Session, team_match: TeamMatch, doubles: list):
         home_player2_rating = get_or_create_player_rating(
             session=session,
             player_id=double.home_player2,
-            competition_id=team_match.competition,
+            team_id=team_match.home_team,
             match_date=team_match.date,
         )
 
@@ -140,7 +140,7 @@ def update_doubles(session: Session, team_match: TeamMatch, doubles: list):
         away_player1_rating = get_or_create_player_rating(
             session=session,
             player_id=double.away_player1,
-            competition_id=team_match.competition,
+            team_id=team_match.away_team,
             match_date=team_match.date,
         )
 
@@ -152,7 +152,7 @@ def update_doubles(session: Session, team_match: TeamMatch, doubles: list):
         away_player2_rating = get_or_create_player_rating(
             session=session,
             player_id=double.away_player2,
-            competition_id=team_match.competition,
+            team_id=team_match.away_team,
             match_date=team_match.date,
         )
 
@@ -266,7 +266,7 @@ def compute_ratings(engine: Engine):
         for (player,) in tqdm(players_wo_rating):
             player_rating = SkillRating(
                 player=player.id,
-                competition=player.default_competition,
+                team=player.team,
                 rating_mu=trueskill.MU,
                 rating_sigma=trueskill.SIGMA,
                 latest_update=team_match.date,
