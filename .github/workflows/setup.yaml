@@ -19,9 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     services:
       selenium:
-        image: selenium/standalone-chrome
+        image: selenium/standalone-firefox
+        env:
+          SE_NODE_MAX_SESSIONS: 3
+        options: >-
+          --shm_size="2g"
         ports:
-          - 4444/tcp
+          - 4444:4444
+          - 7900:7900
 
     steps:
     - name: Checkout repository
