@@ -23,7 +23,7 @@ jobs:
         env:
           SE_NODE_MAX_SESSIONS: 3
         options: >-
-          "--shm-size=2g"
+          --shm-size="2g"
         ports:
           - 4444:4444
           - 7900:7900

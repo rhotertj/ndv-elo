@@ -11,7 +11,7 @@ sys.path.append(str(Path(".").absolute()))
 from src.crawler import Crawler2K
 
 
-def crawl_competition(season, results, association, competition, from_date):
+def crawl_competition(uri, season, results, association, competition, from_date):
     """Function that can crawls data for one competition. Should be used concurrently.
     Depends on a selenium docker instance.
 
@@ -27,7 +27,7 @@ def crawl_competition(season, results, association, competition, from_date):
     """
     logging.info(f"Start {association}: {competition}")
     # Prepare empty result dict for each thread
-    with Crawler2K(season) as crawler:
+    with Crawler2K(season, uri) as crawler:
         results["crawled_competitions"][association] = [competition]
         results[association] = {}
         results[association][competition] = {}
@@ -113,7 +113,7 @@ if "__main__" == __name__:
                 results["crawled_date"] = datetime.now().isoformat()
                 results["season"] = season.isoformat()
                 results["crawled_competitions"] = {}
-                jobs.append((args.season, results, a, c, from_date))
+                jobs.append((args.server, args.season, results, a, c, from_date))
 
     while len(jobs) > 0:
         logging.info(f"Running for {len(jobs)} jobs")
@@ -123,7 +123,7 @@ if "__main__" == __name__:
             }
             for future in concurrent.futures.as_completed(future_to_job):
                 job = future_to_job[future]
-                season, _, a, c, from_date = job
+                _, season, _, a, c, from_date = job
                 logging.info(f"Finished job for {a,c}")
                 try:
                     data = future.result()
