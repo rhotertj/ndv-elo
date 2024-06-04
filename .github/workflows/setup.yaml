@@ -20,13 +20,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Git
-      uses: actions/setup-git@v2
-
     - name: Check for existing artifact
       id: artifact_check
       run: |
-        # Check if the $DB_FILENAME artifact exists
         if gh artifact view $DB_FILENAME --json name --jq '.[0]' > /dev/null 2>&1; then
           echo "CREATE_DB=false" >> "$GITHUB_ENV"
 
