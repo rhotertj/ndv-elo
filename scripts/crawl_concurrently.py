@@ -131,8 +131,10 @@ if "__main__" == __name__:
                         "%Y-%m-%d-T%H+%M+%S"
                     )
                     os.makedirs(data_path / f"{season}", exist_ok=True)
+                    fn = data_path / f"{season}" / f"{a}_{c}_{time_str}.json"
+                    fn = str(fn).replace(" ", "-")
                     with open(
-                        data_path / f"{season}" / f"{a}_{c}_{time_str}.json",
+                        fn,
                         "w+",
                     ) as f:
                         json.dump(data, f)
