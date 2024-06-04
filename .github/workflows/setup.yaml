@@ -21,7 +21,7 @@ jobs:
       selenium:
         image: selenium/standalone-firefox
         env:
-          SE_NODE_MAX_SESSIONS: 3
+          SE_NODE_MAX_SESSIONS: 5
         options: >-
           --shm-size="2g"
         ports:
@@ -61,6 +61,8 @@ jobs:
           --season $CURRENT_SEASON \
           --server http://localhost:4444 \
           --date 2024-05-03
+        ls -la
+        ls -la data
         python scripts/insert_data.py -db $DB_FILENAME --data $(ls $DATA_PATH/*.json)
 
     - name: Upload database as artifact
