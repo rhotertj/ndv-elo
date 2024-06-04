@@ -32,7 +32,7 @@ jobs:
         path: $DB_FILENAME
 
     - name: Create DB
-      if: ${{ steps.download_artifact.conclusion == 'failure' }}
+      if: ${{ failure() && steps.download_artifact.conclusion == 'failure' }}
       run: |
         pip install -r requirements.txt
         python scripts/create_database.py --filename $DB_FILENAME
