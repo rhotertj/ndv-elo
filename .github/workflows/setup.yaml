@@ -39,7 +39,8 @@ jobs:
 
     - name: Run Selenium crawler script
       id: crawler
-      if: ${{ hashFiles('$DB_FILENAME') != '' }}
+      if: ${{ always() }}
+      # if: ${{ hashFiles('$DB_FILENAME') != '' }}
       services:
         selenium:
           image: selenium/standalone-chrome
