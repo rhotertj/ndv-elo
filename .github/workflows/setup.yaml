@@ -63,6 +63,7 @@ jobs:
           --date 2024-05-03
         ls -la
         ls -la data
+        ls $DATA_PATH/$CURRENT_SEASON/*.json
         python scripts/insert_data.py -db $DB_FILENAME --data $(ls $DATA_PATH/$CURRENT_SEASON/*.json)
 
     - name: Upload database as artifact
