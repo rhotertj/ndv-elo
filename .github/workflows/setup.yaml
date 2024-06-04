@@ -69,6 +69,6 @@ jobs:
       if: ${{ always() && steps.crawler.conclusion == 'success' }}
       uses: actions/upload-artifact@v4
       with:
-        name: $DB_FILENAME
-        path: $DB_FILENAME
+        name: ${{ env.DB_FILENAME }}
+        path: ${{ env.DB_FILENAME }}
         overwrite: true
