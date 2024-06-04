@@ -50,8 +50,7 @@ jobs:
 
     - name: Run Selenium crawler script
       id: crawler
-      if: ${{ always() }}
-      # if: ${{ hashFiles('$DB_FILENAME') != '' }}
+      if: ${{ always() && hashFiles($DB_FILENAME) != '' }}
       run: |
         pip install -r requirements.txt
         mkdir -p data
@@ -67,7 +66,7 @@ jobs:
         python scripts/insert_data.py -db $DB_FILENAME --data $(ls $DATA_PATH/$CURRENT_SEASON/*.json)
 
     - name: Upload database as artifact
-      if: ${{ steps.crawler.conclusion == 'success' }}
+      if: ${{ always() && steps.crawler.conclusion == 'success' }}
       uses: actions/upload-artifact@v4
       with:
         name: $DB_FILENAME
