@@ -1,3 +1,4 @@
+name: Crawl data
 extends: .github/workflows/setup.yml
 
 jobs:

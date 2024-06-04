@@ -7,7 +7,7 @@ on:
     - cron: '0 0 * * *'  # Runs every day at midnight (UTC)
     
 env:
-  DB_FILENAME: '$DB_FILENAME'
+  DB_FILENAME: production.db
   CREATE_DB: true
   DATA_PATH: './data'
   CURRENT_SEASON: 2023
@@ -24,7 +24,7 @@ jobs:
       id: artifact_check
       run: |
         if gh artifact view $DB_FILENAME --json name --jq '.[0]' > /dev/null 2>&1; then
-          echo "CREATE_DB=false" >> "$GITHUB_ENV"
+          echo "CREATE_DB=false" >> $GITHUB_ENV
 
     - name: Create or download $DB_FILENAME
       run: |
