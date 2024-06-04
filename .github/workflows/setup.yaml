@@ -1,0 +1,39 @@
+name: Setup Database
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs every day at midnight (UTC)
+env:
+  DB_FILENAME: '$DB_FILENAME'
+  CREATE_DB: true
+  DATA_PATH: './data'
+  CURRENT_SEASON: 2023
+
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Git
+      uses: actions/setup-git@v2
+
+    - name: Check for existing artifact
+      id: artifact_check
+      run: |
+        # Check if the $DB_FILENAME artifact exists
+        if gh artifact view $DB_FILENAME --json name --jq '.[0]' > /dev/null 2>&1; then
+          echo "CREATE_DB=false" >> "$GITHUB_ENV"
+
+    - name: Create or download $DB_FILENAME
+      run: |
+        mkdir artifacts
+
+        if [[ $CREATE_DB == "true" ]]; then
+          gh artifact download $DB_FILENAME --path artifacts
+        else
+          pip install -r requirements.txt
+          python scripts/create_database.py --filename $DB_FILENAME
+        fi

@@ -23,16 +23,14 @@ data_sources = {
 
 class Crawler2K:
 
-    def __init__(self, season) -> None:
+    def __init__(self, season, selenium_uri) -> None:
         self.url = data_sources[season]
+        self.selenium_uri = selenium_uri
 
     def __enter__(self):
         options = Options()
-        # self.browser = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=options)
-        # TODO MAX CONCURRENCY
-        # docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-firefox:4.17.0-20240123
         self.browser = webdriver.Remote(
-            command_executor="http://localhost:4444", options=options
+            command_executor=self.selenium_uri, options=options
         )
         self.browser.implicitly_wait(5)
         self.browser.get(self.url)

@@ -67,6 +67,13 @@ if "__main__" == __name__:
         type=int,
     )
     parser.add_argument(
+        "--server",
+        help="Selenium Container URI",
+        required=True,
+        default="http://localhost:4444",
+        type=str,
+    )
+    parser.add_argument(
         "--associations",
         help="Limit associations to be crawled.",
         nargs="*",
@@ -93,7 +100,7 @@ if "__main__" == __name__:
     logging.info(f"Only checking matches past {from_date}")
 
     jobs = []
-    with Crawler2K(args.season) as crawler:
+    with Crawler2K(args.season, args.server) as crawler:
         if args.associations[0] == "all":
             assocs = crawler.get_associations()
         else:
