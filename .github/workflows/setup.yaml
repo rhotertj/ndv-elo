@@ -1,4 +1,4 @@
-name: All-In-One Workflow
+name: Crawl data and save artifact
 
 on:
   push:
@@ -11,8 +11,6 @@ env:
   CREATE_DB: true
   DATA_PATH: './data'
   CURRENT_SEASON: 2023
-
-
 
 jobs:
   setup:
@@ -54,15 +52,11 @@ jobs:
       run: |
         pip install -r requirements.txt
         mkdir -p data
-        echo $(date -d "2 days ago" +"%Y-%m-%d")
         python scripts/crawl_concurrently.py \
           --path $DATA_PATH \
           --season $CURRENT_SEASON \
           --server http://localhost:4444 \
-          --date 2024-05-03
-        ls -la
-        ls -la data
-        ls $DATA_PATH/$CURRENT_SEASON/*.json
+          --date $(date -d "2 days ago" +"%Y-%m-%d")
         python scripts/insert_data.py -db $DB_FILENAME --data $(ls $DATA_PATH/$CURRENT_SEASON/*.json)
 
     - name: Upload database as artifact
