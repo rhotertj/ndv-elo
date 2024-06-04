@@ -1,4 +1,4 @@
-name: Setup Database
+name: All-In-One Workflow
 
 on:
   push:
@@ -18,21 +18,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+        clean: true
 
-    - name: Check for existing artifact
-      id: artifact_check
+    - name: Download database
+      id: download_artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: $DB_FILENAME
+        path: $DB_FILENAME
+
+    - name: Create DB
+      if: ${{ steps.download_artifact.conclusion == 'failure' }}
       run: |
-        if gh artifact view $DB_FILENAME --json name --jq ".[0]" > /dev/null 2>&1; then
-          echo "CREATE_DB=false" >> $GITHUB_ENV
+        pip install -r requirements.txt
+        python scripts/create_database.py --filename $DB_FILENAME
 
-    - name: Create or download $DB_FILENAME
+    - name: Run Selenium crawler script
       run: |
-        mkdir artifacts
+        pip install -r requirements.txt
+        mkdir data
+        # date -d "2 days ago" +"%Y-%m-%d"
+        python scripts/crawl_concurrently.py --path ./data --season $CURRENT_SEASON --server http://selenium:4444
+        python scripts/insert_data.py -db $DB_FILENAME --data ./data/*.json
 
-        if [[ $CREATE_DB == "true" ]]; then
-          gh artifact download $DB_FILENAME --path artifacts
-        else
-          pip install -r requirements.txt
-          python scripts/create_database.py --filename $DB_FILENAME
-        fi
+    - name: Upload database as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: $DB_FILENAME
+        path: $DB_FILENAME
+        overwrite: true
