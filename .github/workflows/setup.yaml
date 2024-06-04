@@ -63,7 +63,7 @@ jobs:
           --date 2024-05-03
         ls -la
         ls -la data
-        python scripts/insert_data.py -db $DB_FILENAME --data $(ls $DATA_PATH/*.json)
+        python scripts/insert_data.py -db $DB_FILENAME --data $DATA_PATH/$SEASON/*.json
 
     - name: Upload database as artifact
       if: ${{ steps.crawler.conclusion == 'success' }}
