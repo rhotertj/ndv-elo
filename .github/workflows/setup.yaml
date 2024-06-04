@@ -39,8 +39,8 @@ jobs:
       id: download_artifact
       uses: actions/download-artifact@v4
       with:
-        name: $DB_FILENAME
-        path: $DB_FILENAME
+        name: ${{DB_FILENAME}}
+        path: ${{DB_FILENAME}}
 
     - name: Create DB
       if: ${{ failure() && steps.download_artifact.conclusion == 'failure' }}
@@ -56,7 +56,11 @@ jobs:
         pip install -r requirements.txt
         mkdir -p data
         echo $(date -d "2 days ago" +"%Y-%m-%d")
-        python scripts/crawl_concurrently.py --path DATA_PATH --season $CURRENT_SEASON --server http://localhost:4444 --data 2024-05-03
+        python scripts/crawl_concurrently.py \
+          --path $DATA_PATH \
+          --season $CURRENT_SEASON \
+          --server http://localhost:4444 \
+          --date 2024-05-03
         python scripts/insert_data.py -db $DB_FILENAME --data $(ls $DATA_PATH/*.json)
 
     - name: Upload database as artifact
