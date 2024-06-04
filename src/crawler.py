@@ -279,10 +279,10 @@ class Crawler2K:
 
                         matchday_info["date"] = match_date
                         matchday_info["home_team"] = (
-                            match_info[1].get_attribute("textContent").strip()
+                            re.sub(r'\(.*\)', '', match_info[1].get_attribute("textContent")).strip()
                         )
                         matchday_info["away_team"] = (
-                            match_info[2].get_attribute("textContent").strip()
+                            re.sub(r'\(.*\)', '', match_info[2].get_attribute("textContent")).strip()
                         )
                         matchday_info["result"] = (
                             match_info[3].get_attribute("textContent").strip()
