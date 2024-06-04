@@ -56,8 +56,8 @@ jobs:
         pip install -r requirements.txt
         mkdir -p data
         echo $(date -d "2 days ago" +"%Y-%m-%d")
-        python scripts/crawl_concurrently.py --path ./data --season $CURRENT_SEASON --server http://localhost:4444
-        python scripts/insert_data.py -db $DB_FILENAME --data ./data/*.json
+        python scripts/crawl_concurrently.py --path DATA_PATH --season $CURRENT_SEASON --server http://localhost:4444 --data 2024-05-03
+        python scripts/insert_data.py -db $DB_FILENAME --data $(ls $DATA_PATH/*.json)
 
     - name: Upload database as artifact
       if: ${{ steps.crawler.conclusion == 'success' }}
