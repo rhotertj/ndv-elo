@@ -246,6 +246,7 @@ def populate_teammatches(
                         and_(
                             Team.rank == home_team_name[-1],
                             Club.name == home_team_name[:-2],
+                            Team.year == season.isoformat(),
                         )
                     )
                 )
@@ -259,6 +260,7 @@ def populate_teammatches(
                         and_(
                             Team.rank == away_team_name[-1],
                             Club.name == away_team_name[:-2],
+                            Team.year == season.isoformat(),
                         )
                     )
                 )
