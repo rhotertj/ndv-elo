@@ -1,8 +1,11 @@
 name: Setup Database
 
 on:
+  push:
+    branches: [ main, github-actions]
   schedule:
     - cron: '0 0 * * *'  # Runs every day at midnight (UTC)
+    
 env:
   DB_FILENAME: '$DB_FILENAME'
   CREATE_DB: true
