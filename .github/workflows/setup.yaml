@@ -38,6 +38,8 @@ jobs:
         python scripts/create_database.py --filename $DB_FILENAME
 
     - name: Run Selenium crawler script
+      id: crawler
+      if: ${{ hashFiles('$DB_FILENAME') != '' }}
       services:
         selenium:
           image: selenium/standalone-chrome
@@ -51,6 +53,7 @@ jobs:
         python scripts/insert_data.py -db $DB_FILENAME --data ./data/*.json
 
     - name: Upload database as artifact
+      if: ${{ steps.crawler.conclusion == 'success' }}
       uses: actions/upload-artifact@v4
       with:
         name: $DB_FILENAME
