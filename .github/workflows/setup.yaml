@@ -39,8 +39,8 @@ jobs:
       id: download_artifact
       uses: actions/download-artifact@v4
       with:
-        name: ${{DB_FILENAME}}
-        path: ${{DB_FILENAME}}
+        name: $DB_FILENAME
+        path: $DB_FILENAME
 
     - name: Create DB
       if: ${{ failure() && steps.download_artifact.conclusion == 'failure' }}
